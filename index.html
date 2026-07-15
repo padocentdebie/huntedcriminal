@@ -188,7 +188,8 @@
       color: #f0c040;
     }
     #criminalMap {
-      height: 300px;
+      height: 400px; /* groter */
+      width: 100%;
       border-radius: 8px;
       background: #0d1624;
       margin-top: 8px;
@@ -463,6 +464,7 @@
   const proofPhotoInput = document.getElementById('proofPhotoInput');
   const uploadProofBtn = document.getElementById('uploadProofBtn');
   const proofUploadStatus = document.getElementById('proofUploadStatus');
+  const criminalExtractLoc = document.getElementById('criminalExtractLoc');
   const mapContainer = document.getElementById('criminalMap');
 
   let className = 'Alpha';
@@ -575,7 +577,7 @@
     gameStatusRef = ref(db, `klassen/${className}/game/status`);
     missionsRef = ref(db, `klassen/${className}/missions`);
 
-    // Initialiseer kaart (als die nog niet bestaat)
+    // Initialiseer kaart (éénmalig)
     if (!map) {
       map = L.map('criminalMap').setView([52.0, 5.0], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -611,6 +613,8 @@
             missionCryptic.textContent = mission.cryptic || 'Geen cryptische omschrijving.';
             missionDescription.textContent = mission.description || 'Geen omschrijving.';
             missionFull.classList.remove('hidden');
+            // Update locatie in info-balk
+            criminalExtractLoc.innerHTML = `📍 <strong>${mission.description}</strong><br>🗺️ Coördinaten: ${mission.lat.toFixed(6)}, ${mission.lng.toFixed(6)}`;
             // Update kaart met missielocatie
             updateMap(mission.lat, mission.lng);
             // Start tracking voor deze missie
@@ -641,8 +645,10 @@
         fillOpacity: 0.2,
         radius: MISSION_RADIUS
       }).addTo(map);
-      // Zoom naar locatie
+      // Zoom naar locatie (met passende zoom)
       map.setView([lat, lng], 15);
+      // Forceer een resize van de kaart (stabieler)
+      setTimeout(() => map.invalidateSize(), 100);
     }
 
     async function startGameplay() {
@@ -677,6 +683,7 @@
         // Alle missies voltooid -> winnaar!
         missionCryptic.textContent = '🏆 Je hebt alle missies voltooid! Je bent ontsnapt!';
         missionFull.classList.add('hidden');
+        criminalExtractLoc.textContent = '🏆 Alle missies voltooid!';
         await update(playerRef, { extractReached: true });
         return;
       }
@@ -771,6 +778,7 @@
         missionUnlocked = false;
         missionFull.classList.add('hidden');
         missionCryptic.textContent = 'Missie voltooid! Nieuwe missie wordt toegewezen...';
+        criminalExtractLoc.textContent = 'Missie voltooid! Nieuwe missie wordt toegewezen...';
         // Wijs nieuwe missie toe
         await assignNewMission();
       } catch (err) {
