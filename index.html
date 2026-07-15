@@ -188,7 +188,7 @@
       color: #f0c040;
     }
     #criminalMap {
-      height: 400px; /* groter */
+      height: 400px;
       width: 100%;
       border-radius: 8px;
       background: #0d1624;
@@ -256,6 +256,7 @@
       <div id="missionCryptic" class="mission-box">
         (Geen actieve missie)
       </div>
+      <!-- Volledige opdracht (verborgen tot op locatie) -->
       <div id="missionFull" class="mission-details hidden">
         <strong>Opdracht:</strong> <span id="missionDescription"></span><br>
         <div style="margin-top:8px; font-size:0.85rem; color:#8899aa;" id="missionProgress">
@@ -612,8 +613,10 @@
             currentMissionData = mission;
             missionCryptic.textContent = mission.cryptic || 'Geen cryptische omschrijving.';
             missionDescription.textContent = mission.description || 'Geen omschrijving.';
-            missionFull.classList.remove('hidden');
-            // Update locatie in info-balk
+            // Verberg volledige opdracht tot op locatie
+            missionFull.classList.add('hidden');
+            missionUnlocked = false;
+            // Toon de locatiebeschrijving en coördinaten in de info-balk
             criminalExtractLoc.innerHTML = `📍 <strong>${mission.description}</strong><br>🗺️ Coördinaten: ${mission.lat.toFixed(6)}, ${mission.lng.toFixed(6)}`;
             // Update kaart met missielocatie
             updateMap(mission.lat, mission.lng);
@@ -633,10 +636,8 @@
 
     function updateMap(lat, lng) {
       if (!map) return;
-      // Verwijder oude marker en circle
       if (marker) map.removeLayer(marker);
       if (circle) map.removeLayer(circle);
-      // Voeg nieuwe marker en circle toe
       marker = L.marker([lat, lng]).addTo(map)
         .bindPopup(`<strong>Missielocatie</strong><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       circle = L.circle([lat, lng], {
@@ -645,26 +646,21 @@
         fillOpacity: 0.2,
         radius: MISSION_RADIUS
       }).addTo(map);
-      // Zoom naar locatie (met passende zoom)
       map.setView([lat, lng], 15);
-      // Forceer een resize van de kaart (stabieler)
       setTimeout(() => map.invalidateSize(), 100);
     }
 
     async function startGameplay() {
-      // Als de speler nog geen missie heeft en het spel is gestart, wijs een missie toe
       const snapshot = await get(playerRef);
       const player = snapshot.val();
       if (player && !player.currentMissionId) {
         await assignNewMission();
       }
-      // Start pings
       schedulePing();
     }
 
     // --------------------- MISSIE TOEWIJZEN ---------------------
     async function assignNewMission() {
-      // Haal alle missies op
       const missionsSnap = await get(missionsRef);
       const missions = missionsSnap.val();
       if (!missions) {
@@ -672,15 +668,12 @@
         return;
       }
 
-      // Haal voltooide missies van speler op
       const playerSnap = await get(playerRef);
       const player = playerSnap.val();
       const completed = player.completedMissions || [];
 
-      // Filter onvoltooide missies
       const available = Object.keys(missions).filter(id => !completed.includes(id));
       if (available.length === 0) {
-        // Alle missies voltooid -> winnaar!
         missionCryptic.textContent = '🏆 Je hebt alle missies voltooid! Je bent ontsnapt!';
         missionFull.classList.add('hidden');
         criminalExtractLoc.textContent = '🏆 Alle missies voltooid!';
@@ -688,13 +681,9 @@
         return;
       }
 
-      // Kies een willekeurige onvoltooide missie (ad random)
       const randomId = available[Math.floor(Math.random() * available.length)];
       const mission = missions[randomId];
-
-      // Update speler: stel huidige missie in
       await update(playerRef, { currentMissionId: randomId });
-      // De listener zal de missie tonen
     }
 
     // --------------------- MISSIE TRACKING (locatie) ---------------------
@@ -705,6 +694,27 @@
         setStatus(document.getElementById('missionProgress'), 'Geolocatie niet ondersteund.', 'error');
         return;
       }
+
+      // Controleer meteen de huidige positie
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const distance = getDistanceFromLatLonInMeters(lat, lng, mission.lat, mission.lng);
+          distanceDisplay.textContent = Math.round(distance);
+          if (distance <= MISSION_RADIUS && !missionUnlocked) {
+            missionUnlocked = true;
+            missionFull.classList.remove('hidden');
+            setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en upload het bewijs.', 'success');
+          }
+        },
+        (error) => {
+          console.warn('Initial position error:', error);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+
+      // Start continue watch
       watchPositionId = navigator.geolocation.watchPosition(
         (position) => {
           const lat = position.coords.latitude;
@@ -713,6 +723,7 @@
           distanceDisplay.textContent = Math.round(distance);
           if (distance <= MISSION_RADIUS && !missionUnlocked) {
             missionUnlocked = true;
+            missionFull.classList.remove('hidden');
             setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en upload het bewijs.', 'success');
           }
         },
@@ -764,7 +775,6 @@
         });
         setStatus(proofUploadStatus, '✅ Bewijs geüpload!', 'success');
 
-        // Markeer missie als voltooid voor deze speler
         const playerSnap = await get(playerRef);
         const player = playerSnap.val();
         const completed = player.completedMissions || [];
@@ -772,14 +782,13 @@
           completed.push(currentMissionId);
           await update(playerRef, {
             completedMissions: completed,
-            currentMissionId: null // reset huidige missie, zodat volgende wordt toegewezen
+            currentMissionId: null
           });
         }
         missionUnlocked = false;
         missionFull.classList.add('hidden');
         missionCryptic.textContent = 'Missie voltooid! Nieuwe missie wordt toegewezen...';
         criminalExtractLoc.textContent = 'Missie voltooid! Nieuwe missie wordt toegewezen...';
-        // Wijs nieuwe missie toe
         await assignNewMission();
       } catch (err) {
         setStatus(proofUploadStatus, '❌ Fout: ' + err.message, 'error');
@@ -853,7 +862,7 @@
     });
 
     async function assignNewLocation() {
-      // (bestaande functie voor de "aanwijzingen" – hier niet gewijzigd)
+      // (bestaande functie – niet gewijzigd)
     }
 
     // Chat
