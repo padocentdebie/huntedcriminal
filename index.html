@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🕵️ Hunted - Crimineel</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0e17;
+      color: #e0e0e0;
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    .card {
+      background: #1a2332;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border: 1px solid #2a3a4a;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: #f0c040;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h1 small { font-size: 1rem; color: #8899aa; font-weight: normal; }
+    h2 { font-size: 1.3rem; color: #88ccff; margin-bottom: 12px; }
+    .form-group { margin-bottom: 14px; }
+    label { font-weight: 600; display: block; margin-bottom: 4px; color: #aabbcc; }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid #2a3a4a;
+      background: #0d1624;
+      color: #e0e0e0;
+      font-size: 1rem;
+    }
+    input:focus { border-color: #4a90d9; outline: none; }
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: #4a90d9; color: white; }
+    .btn-primary:hover { background: #357abd; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-success:hover { background: #218838; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-danger:hover { background: #c82333; }
+    .btn-warning { background: #f0c040; color: #1a2332; }
+    .btn-warning:hover { background: #d4a830; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .btn-group .btn { flex: 1; }
+    .hidden { display: none !important; }
+    #status {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #0d1624;
+      color: #8899aa;
+      font-size: 0.95rem;
+    }
+    #status.error { background: #3d1a1a; color: #ff6b6b; }
+    #status.success { background: #1a3d1a; color: #6bff6b; }
+    #status.warning { background: #3d3a1a; color: #ffd76b; }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #1a2a3a;
+      flex-wrap: wrap;
+    }
+    .info-row .label { color: #8899aa; }
+    .info-row .value { color: #e0e0e0; font-weight: 600; }
+    .chat-messages {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #0d1624;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .chat-message {
+      padding: 4px 0;
+      border-bottom: 1px solid #1a2a3a;
+      font-size: 0.9rem;
+    }
+    .chat-message .sender { color: #88ccff; font-weight: 600; }
+    .chat-message .time { color: #667788; font-size: 0.7rem; }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-criminal { background: #dc3545; color: white; }
+    @media (max-width: 480px) {
+      .btn-group .btn { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <!-- LOGIN SCHERM -->
+  <div id="loginScreen" class="container">
+    <div class="card">
+      <h1>🕵️ Hunted</h1>
+      <p style="color: #8899aa; margin-bottom: 16px;">Crimineel dashboard – Klasgebaseerd</p>
+      <!-- Instructies voor criminelen -->
+      <div style="background: #0d1624; border-radius: 8px; padding: 12px; margin-bottom: 16px; border-left: 4px solid #f0c040;">
+        <p><strong>👤 Crimineel:</strong> Je bent op de vlucht omdat je examengegevens hebt gestolen. Zoek de geheime locatie van de examens door vragen correct te beantwoorden.</p>
+        <p style="font-size:0.85rem; color:#8899aa;">Kies je klas, voer je teamnaam in en log in.</p>
+      </div>
+      <div class="form-group">
+        <label>Kies je klas</label>
+        <select id="classSelect">
+          <option value="Alpha">Alpha</option>
+          <option value="Bravo">Bravo</option>
+          <option value="Charlie">Charlie</option>
+          <option value="Delta">Delta</option>
+          <option value="Echo">Echo</option>
+          <option value="Foxtrot">Foxtrot</option>
+          <option value="Golf">Golf</option>
+          <option value="Hotel">Hotel</option>
+          <option value="Juliett">Juliett</option>
+          <option value="Kilo">Kilo</option>
+          <option value="Mike">Mike</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Teamnaam / Gebruikersnaam</label>
+        <input type="text" id="usernameInput" placeholder="Bijv. Team Alpha" />
+      </div>
+      <button class="btn btn-primary" id="loginBtn" style="width:100%;">🚀 Start spel</button>
+      <div id="loginStatus" style="margin-top:12px;font-size:0.9rem;color:#8899aa;"></div>
+    </div>
+  </div>
+
+  <!-- CRIMINEEL DASHBOARD -->
+  <div id="criminalScreen" class="container hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <h1 style="font-size:1.4rem;">👤 Crimineel</h1>
+        <span class="badge badge-criminal" id="criminalStatusBadge">Op de vlucht</span>
+      </div>
+      <div id="criminalInfo" class="info-row"><span class="label">Team:</span><span class="value" id="criminalTeamName">-</span></div>
+      <div id="criminalTimer" class="info-row"><span class="label">⏱️ Resterende tijd:</span><span class="value" id="criminalTimerValue">--:--</span></div>
+      <div id="criminalExtract" class="info-row"><span class="label">📍 Locatie:</span><span class="value" id="criminalExtractLoc">Onbekend</span></div>
+    </div>
+
+    <div class="card">
+      <h2>🗺️ Huidige aanwijzing</h2>
+      <div id="clueList">Geen aanwijzingen beschikbaar.</div>
+      <div class="form-group" style="margin-top:12px;">
+        <label>Voer het antwoord in</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="clueCodeInput" placeholder="Bijv. De Boekenberg" style="flex:1;" />
+          <button class="btn btn-success" id="submitClueBtn">✅ Verzend</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>💬 Chat (publiek)</h2>
+      <div id="criminalChatMessages" class="chat-messages">Geen berichten.</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="criminalChatInput" placeholder="Bericht..." style="flex:1;" />
+        <button class="btn btn-primary" id="criminalSendChatBtn">📤 Verstuur</button>
+      </div>
+    </div>
+
+    <button class="btn btn-danger" id="criminalLogoutBtn" style="width:100%;margin-top:8px;">🚪 Uitloggen</button>
+  </div>
+</div>
+
+<script type="module">
+  // --------------------- FIREBASE CONFIG ---------------------
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+  import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB12mTMBnuxdC4W4htyFO_C7Dnh3maVKew",
+    authDomain: "decoroefening.firebaseapp.com",
+    databaseURL: "https://decoroefening-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "decoroefening",
+    storageBucket: "decoroefening.firebasestorage.app",
+    messagingSenderId: "945998495824",
+    appId: "1:945998495824:web:a76dc7519b3b262a021155"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const GAME_DURATION = 3600; // 60 minuten
+
+  // DOM refs
+  const loginScreen = document.getElementById('loginScreen');
+  const criminalScreen = document.getElementById('criminalScreen');
+  const classSelect = document.getElementById('classSelect');
+  const usernameInput = document.getElementById('usernameInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginStatus = document.getElementById('loginStatus');
+
+  let className = 'Alpha';
+  let pingTimer = null;
+
+  function setStatus(el, msg, type = 'info') {
+    el.textContent = msg;
+    el.className = type;
+  }
+
+  function showScreen(screenId) {
+    [loginScreen, criminalScreen].forEach(s => s.classList.add('hidden'));
+    document.getElementById(screenId).classList.remove('hidden');
+  }
+
+  function getTimestamp() { return Date.now(); }
+
+  function updateTimer(elementId, className) {
+    const el = document.getElementById(elementId);
+    if (!el || !className) return;
+    get(ref(db, `klassen/${className}/game/startTime`)).then(snapshot => {
+      const start = snapshot.val();
+      if (!start) {
+        el.textContent = '--:--';
+        return;
+      }
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+      const remaining = Math.max(0, GAME_DURATION - elapsed);
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      el.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    });
+  }
+
+  function logout() {
+    if (pingTimer) clearTimeout(pingTimer);
+    showScreen('loginScreen');
+    setStatus(loginStatus, 'Uitgelogd.', 'info');
+  }
+
+  // Login
+  loginBtn.addEventListener('click', async () => {
+    const teamName = usernameInput.value.trim();
+    className = classSelect.value;
+
+    if (!teamName) {
+      setStatus(loginStatus, 'Voer een teamnaam in.', 'error');
+      return;
+    }
+
+    setStatus(loginStatus, '🔄 Inloggen...', 'info');
+
+    try {
+      const playerRef = ref(db, `klassen/${className}/players/${teamName}`);
+      const snapshot = await get(playerRef);
+      if (snapshot.exists()) {
+        setStatus(loginStatus, '❌ Deze teamnaam is al in gebruik in deze klas.', 'error');
+        return;
+      }
+
+      const playerData = {
+        role: 'criminal',
+        teamName: teamName,
+        className: className,
+        joinedAt: getTimestamp(),
+        status: 'on_the_run',
+        cluesFound: [],
+        isArrested: false,
+        extractReached: false,
+        currentLocationId: null,
+        completedLocations: [],
+        hunterTimerEnd: null,
+        locationStartTime: null
+      };
+      await set(playerRef, playerData);
+
+      setStatus(loginStatus, `✅ Ingelogd als crimineel in klas ${className}`, 'success');
+      showScreen('criminalScreen');
+      initCriminalDashboard(teamName, className);
+    } catch (err) {
+      setStatus(loginStatus, '❌ Fout bij inloggen: ' + err.message, 'error');
+    }
+  });
+
+  // --------------------- CRIMINEEL DASHBOARD ---------------------
+  function initCriminalDashboard(teamName, className) {
+    updateTimer('criminalTimerValue', className);
+    setInterval(() => updateTimer('criminalTimerValue', className), 1000);
+
+    document.getElementById('criminalTeamName').textContent = teamName + ' (' + className + ')';
+
+    const locRef = ref(db, `klassen/${className}/locations`);
+    const playerRef = ref(db, `klassen/${className}/players/${teamName}`);
+
+    async function assignNewLocation() {
+      const snapshot = await get(playerRef);
+      const player = snapshot.val();
+      if (!player) return;
+
+      const locSnapshot = await get(locRef);
+      const locations = locSnapshot.val();
+      if (!locations) {
+        setStatus(document.getElementById('criminalChatMessages'), 'Geen locaties beschikbaar.', 'error');
+        return;
+      }
+
+      const completed = player.completedLocations || [];
+      const available = Object.keys(locations).filter(key => !completed.includes(key));
+      if (available.length === 0) {
+        document.getElementById('criminalExtractLoc').textContent = '🏆 Je hebt alle locaties gevonden! Je hebt gewonnen!';
+        await update(playerRef, { extractReached: true });
+        return;
+      }
+
+      const randomKey = available[Math.floor(Math.random() * available.length)];
+      const location = locations[randomKey];
+
+      const now = Date.now();
+      const timerDelay = Math.floor(Math.random() * (3 * 60 * 1000 - 30 * 1000) + 30 * 1000);
+      const hunterTimerEnd = now + timerDelay;
+
+      await update(playerRef, {
+        currentLocationId: randomKey,
+        locationStartTime: now,
+        hunterTimerEnd: hunterTimerEnd,
+        status: 'on_the_run'
+      });
+
+      document.getElementById('criminalExtractLoc').innerHTML =
+        `📍 <strong>${location.description}</strong><br>
+         🗺️ Coördinaten: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}<br>
+         ❓ ${location.question}`;
+      setStatus(document.getElementById('criminalChatMessages'), `Nieuwe locatie: ${location.description}`, 'success');
+    }
+
+    get(playerRef).then(snapshot => {
+      const player = snapshot.val();
+      if (player && !player.currentLocationId && !player.extractReached) {
+        assignNewLocation();
+      } else if (player && player.currentLocationId) {
+        get(locRef).then(locSnap => {
+          const locs = locSnap.val();
+          if (locs && locs[player.currentLocationId]) {
+            const loc = locs[player.currentLocationId];
+            document.getElementById('criminalExtractLoc').innerHTML =
+              `📍 <strong>${loc.description}</strong><br>
+               🗺️ Coördinaten: ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}<br>
+               ❓ ${loc.question}`;
+          }
+        });
+      }
+    });
+
+    // Antwoord verzenden
+    document.getElementById('submitClueBtn').addEventListener('click', async () => {
+      const answer = document.getElementById('clueCodeInput').value.trim();
+      if (!answer) {
+        setStatus(document.getElementById('criminalChatMessages'), 'Voer een antwoord in.', 'error');
+        return;
+      }
+
+      const snapshot = await get(playerRef);
+      const player = snapshot.val();
+      if (!player || !player.currentLocationId) {
+        setStatus(document.getElementById('criminalChatMessages'), 'Je hebt momenteel geen locatie.', 'error');
+        return;
+      }
+
+      const locSnapshot = await get(locRef);
+      const locations = locSnapshot.val();
+      if (!locations) {
+        setStatus(document.getElementById('criminalChatMessages'), 'Geen locaties gevonden.', 'error');
+        return;
+      }
+
+      const currentLoc = locations[player.currentLocationId];
+      if (!currentLoc) {
+        setStatus(document.getElementById('criminalChatMessages'), 'Locatie niet gevonden.', 'error');
+        return;
+      }
+
+      if (answer.toLowerCase() === currentLoc.answer.toLowerCase()) {
+        const now = Date.now();
+        await update(playerRef, { hunterTimerEnd: now });
+
+        const completed = player.completedLocations || [];
+        if (!completed.includes(player.currentLocationId)) {
+          completed.push(player.currentLocationId);
+          await update(playerRef, { completedLocations: completed });
+        }
+
+        setStatus(document.getElementById('criminalChatMessages'), '✅ Juist antwoord! Nieuwe locatie komt eraan.', 'success');
+        document.getElementById('clueCodeInput').value = '';
+        await assignNewLocation();
+      } else {
+        setStatus(document.getElementById('criminalChatMessages'), '❌ Fout antwoord, probeer opnieuw.', 'error');
+      }
+    });
+
+    // Chat
+    const chatsRef = ref(db, `klassen/${className}/chats`);
+    onValue(chatsRef, (snapshot) => {
+      const data = snapshot.val();
+      const chatDiv = document.getElementById('criminalChatMessages');
+      if (!data) {
+        chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>';
+        return;
+      }
+      let html = '';
+      const keys = Object.keys(data).sort((a,b) => data[a].timestamp - data[b].timestamp);
+      for (const key of keys) {
+        const msg = data[key];
+        html += `
+          <div class="chat-message">
+            <span class="sender">${msg.sender || 'Onbekend'}:</span>
+            <span>${msg.text}</span>
+            <span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+          </div>
+        `;
+      }
+      chatDiv.innerHTML = html || '<div style="color:#8899aa;">Geen berichten.</div>';
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    });
+
+    document.getElementById('criminalSendChatBtn').addEventListener('click', async () => {
+      const text = document.getElementById('criminalChatInput').value.trim();
+      if (!text) return;
+      await push(chatsRef, {
+        sender: teamName + ' (C)',
+        text: text,
+        timestamp: getTimestamp()
+      });
+      document.getElementById('criminalChatInput').value = '';
+    });
+
+    // Heimelijke ping (voor hunters)
+    function sendPing() {
+      const lat = 52.0 + Math.random() * 0.1;
+      const lng = 5.0 + Math.random() * 0.1;
+      push(ref(db, `klassen/${className}/pings`), {
+        teamName: teamName,
+        latitude: lat,
+        longitude: lng,
+        timestamp: getTimestamp()
+      }).catch(err => console.warn('Ping mislukt:', err));
+    }
+
+    function schedulePing() {
+      if (pingTimer) clearTimeout(pingTimer);
+      const interval = Math.floor(Math.random() * (15 * 60 * 1000 - 2 * 60 * 1000) + 2 * 60 * 1000);
+      pingTimer = setTimeout(() => {
+        sendPing();
+        schedulePing();
+      }, interval);
+    }
+
+    const gameStatusRef = ref(db, `klassen/${className}/game/status`);
+    onValue(gameStatusRef, (snapshot) => {
+      const status = snapshot.val();
+      if (status === 'running') {
+        if (!pingTimer) schedulePing();
+      } else {
+        if (pingTimer) { clearTimeout(pingTimer); pingTimer = null; }
+      }
+    });
+
+    document.getElementById('criminalLogoutBtn').addEventListener('click', () => {
+      if (confirm('Weet je zeker dat je wilt uitloggen?')) {
+        logout();
+      }
+    });
+  }
+
+  // Init
+  showScreen('loginScreen');
+  setStatus(loginStatus, 'Kies je klas, voer je teamnaam in en log in.', 'info');
+</script>
+</body>
+</html>
