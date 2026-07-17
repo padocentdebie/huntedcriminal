@@ -1,994 +1,1376 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🕵️ Hunted - Crimineel</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0a0e17;
-      color: #e0e0e0;
-      padding: 16px;
-      max-width: 800px;
-      margin: 0 auto;
-      min-height: 100vh;
-    }
-    .container { max-width: 600px; margin: 0 auto; }
-    .card {
-      background: #1a2332;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      border: 1px solid #2a3a4a;
-    }
-    h1 {
-      font-size: 1.8rem;
-      color: #f0c040;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    h1 small { font-size: 1rem; color: #8899aa; font-weight: normal; }
-    h2 { font-size: 1.3rem; color: #88ccff; margin-bottom: 12px; }
-    .form-group { margin-bottom: 14px; }
-    label { font-weight: 600; display: block; margin-bottom: 4px; color: #aabbcc; }
-    input, select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 8px;
-      border: 1px solid #2a3a4a;
-      background: #0d1624;
-      color: #e0e0e0;
-      font-size: 1rem;
-    }
-    input:focus { border-color: #4a90d9; outline: none; }
-    .btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn:active { transform: scale(0.96); }
-    .btn-primary { background: #4a90d9; color: white; }
-    .btn-primary:hover { background: #357abd; }
-    .btn-success { background: #28a745; color: white; }
-    .btn-success:hover { background: #218838; }
-    .btn-danger { background: #dc3545; color: white; }
-    .btn-danger:hover { background: #c82333; }
-    .btn-warning { background: #f0c040; color: #1a2332; }
-    .btn-warning:hover { background: #d4a830; }
-    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-    .btn-group .btn { flex: 1; }
-    .hidden { display: none !important; }
-    #status {
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 8px;
-      background: #0d1624;
-      color: #8899aa;
-      font-size: 0.95rem;
-    }
-    #status.error { background: #3d1a1a; color: #ff6b6b; }
-    #status.success { background: #1a3d1a; color: #6bff6b; }
-    #status.warning { background: #3d3a1a; color: #ffd76b; }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid #1a2a3a;
-      flex-wrap: wrap;
-    }
-    .info-row .label { color: #8899aa; }
-    .info-row .value { color: #e0e0e0; font-weight: 600; }
-    .chat-messages {
-      max-height: 200px;
-      overflow-y: auto;
-      background: #0d1624;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 8px;
-    }
-    .chat-message {
-      padding: 4px 0;
-      border-bottom: 1px solid #1a2a3a;
-      font-size: 0.9rem;
-    }
-    .chat-message .sender { color: #88ccff; font-weight: 600; }
-    .chat-message .time { color: #667788; font-size: 0.7rem; }
-    .badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .badge-criminal { background: #dc3545; color: white; }
-    @media (max-width: 480px) {
-      .btn-group .btn { flex: 1 1 100%; }
-    }
-    .photo-feed {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .photo-item {
-      background: #0d1624;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #2a3a4a;
-    }
-    .photo-item img {
-      width: 100%;
-      display: block;
-    }
-    .photo-item .meta {
-      padding: 8px 12px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      color: #8899aa;
-    }
-    .photo-item .meta .uploader {
-      color: #88ccff;
-      font-weight: 600;
-    }
-    .photo-upload-area {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-    .photo-upload-area input[type="file"] {
-      display: none;
-    }
-    .upload-btn-wrapper {
-      display: inline-block;
-    }
-    .waiting-message {
-      background: #0d1624;
-      border-radius: 8px;
-      padding: 12px;
-      border-left: 4px solid #f0c040;
-      color: #f0c040;
-      text-align: center;
-      font-weight: 600;
-    }
-    .mission-box {
-      background: #0d1624;
-      border-radius: 8px;
-      padding: 12px;
-      border-left: 4px solid #8b5cf6;
-      color: #d4c0f0;
-      font-style: italic;
-      line-height: 1.6;
-    }
-    .mission-details {
-      background: #0d1624;
-      border-radius: 8px;
-      padding: 12px;
-      border-left: 4px solid #f0c040;
-      margin-top: 8px;
-      color: #e0e0e0;
-    }
-    .mission-details strong {
-      color: #f0c040;
-    }
-    #criminalMap {
-      height: 400px;
-      width: 100%;
-      border-radius: 8px;
-      background: #0d1624;
-      margin-top: 8px;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>🕵️ Hunted - Crimineel</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e17;
+            color: #e0e0e0;
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #1a2332;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid #2a3a4a;
+        }
+        h1 {
+            font-size: 1.8rem;
+            color: #f0c040;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 small {
+            font-size: 1rem;
+            color: #8899aa;
+            font-weight: normal;
+        }
+        h2 {
+            font-size: 1.3rem;
+            color: #88ccff;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+            color: #aabbcc;
+        }
+        input,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #2a3a4a;
+            background: #0d1624;
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+        input:focus {
+            border-color: #4a90d9;
+            outline: none;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: #4a90d9;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #357abd;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-warning {
+            background: #f0c040;
+            color: #1a2332;
+        }
+        .btn-warning:hover {
+            background: #d4a830;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .btn-group .btn {
+            flex: 1;
+        }
+        .hidden {
+            display: none !important;
+        }
+        #status {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #0d1624;
+            color: #8899aa;
+            font-size: 0.95rem;
+        }
+        #status.error {
+            background: #3d1a1a;
+            color: #ff6b6b;
+        }
+        #status.success {
+            background: #1a3d1a;
+            color: #6bff6b;
+        }
+        #status.warning {
+            background: #3d3a1a;
+            color: #ffd76b;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #1a2a3a;
+            flex-wrap: wrap;
+        }
+        .info-row .label {
+            color: #8899aa;
+        }
+        .info-row .value {
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+        .chat-messages {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #0d1624;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        .chat-message {
+            padding: 4px 0;
+            border-bottom: 1px solid #1a2a3a;
+            font-size: 0.9rem;
+        }
+        .chat-message .sender {
+            color: #88ccff;
+            font-weight: 600;
+        }
+        .chat-message .time {
+            color: #667788;
+            font-size: 0.7rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-criminal {
+            background: #dc3545;
+            color: white;
+        }
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        @media (max-width: 480px) {
+            .btn-group .btn {
+                flex: 1 1 100%;
+            }
+        }
+        .photo-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .photo-item {
+            background: #0d1624;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2a3a4a;
+        }
+        .photo-item img {
+            width: 100%;
+            display: block;
+        }
+        .photo-item .meta {
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #8899aa;
+        }
+        .photo-item .meta .uploader {
+            color: #88ccff;
+            font-weight: 600;
+        }
+        .photo-upload-area {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .photo-upload-area input[type="file"] {
+            display: none;
+        }
+        .waiting-message {
+            background: #0d1624;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #f0c040;
+            color: #f0c040;
+            text-align: center;
+            font-weight: 600;
+        }
+        .mission-box {
+            background: #0d1624;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #8b5cf6;
+            color: #d4c0f0;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        .mission-details {
+            background: #0d1624;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #f0c040;
+            margin-top: 8px;
+            color: #e0e0e0;
+        }
+        .mission-details strong {
+            color: #f0c040;
+        }
+        #criminalMap {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            background: #0d1624;
+            margin-top: 8px;
+        }
+        .timer-warning {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+        }
+        .mission-counter {
+            background: #0d1624;
+            border-radius: 8px;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #8899aa;
+            margin-top: 6px;
+        }
+        .mission-counter strong {
+            color: #f0c040;
+        }
+        .spoor-box {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 8px;
+            border-left: 3px solid #f0c040;
+            font-size: 0.9rem;
+            color: #c8b8e0;
+            white-space: pre-wrap;
+        }
+        .spoor-box strong {
+            color: #f0c040;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .complete-banner {
+            background: #1a3d1a;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #28a745;
+        }
+        .complete-banner h2 {
+            color: #6bff6b;
+            margin-bottom: 4px;
+        }
+    </style>
 </head>
 <body>
 
-<div id="app">
-  <!-- LOGIN SCHERM -->
-  <div id="loginScreen" class="container">
-    <div class="card">
-      <h1>🕵️ Hunted</h1>
-      <p style="color: #8899aa; margin-bottom: 16px;">Crimineel dashboard – Klasgebaseerd</p>
-      <div style="background: #0d1624; border-radius: 8px; padding: 12px; margin-bottom: 16px; border-left: 4px solid #f0c040;">
-        <p><strong>👤 Crimineel:</strong> Je bent op de vlucht omdat je examengegevens hebt gestolen. Zoek de geheime locatie van de examens door vragen correct te beantwoorden.</p>
-        <p style="font-size:0.85rem; color:#8899aa;">Kies je klas, voer je teamnaam in en log in.</p>
-      </div>
-      <div class="form-group">
-        <label>Kies je klas</label>
-        <select id="classSelect">
-          <option value="Alpha">Alpha</option>
-          <option value="Bravo">Bravo</option>
-          <option value="Charlie">Charlie</option>
-          <option value="Delta">Delta</option>
-          <option value="Echo">Echo</option>
-          <option value="Foxtrot">Foxtrot</option>
-          <option value="Golf">Golf</option>
-          <option value="Hotel">Hotel</option>
-          <option value="Juliett">Juliett</option>
-          <option value="Kilo">Kilo</option>
-          <option value="Mike">Mike</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Teamnaam / Gebruikersnaam</label>
-        <input type="text" id="usernameInput" placeholder="Bijv. Team Alpha" />
-      </div>
-      <button class="btn btn-primary" id="loginBtn" style="width:100%;">🚀 Inloggen</button>
-      <div id="loginStatus" style="margin-top:12px;font-size:0.9rem;color:#8899aa;"></div>
-    </div>
-  </div>
-
-  <!-- CRIMINEEL DASHBOARD -->
-  <div id="criminalScreen" class="container hidden">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <h1 style="font-size:1.4rem;">👤 Crimineel</h1>
-        <span class="badge badge-criminal" id="criminalStatusBadge">Op de vlucht</span>
-      </div>
-      <div id="criminalInfo" class="info-row"><span class="label">Team:</span><span class="value" id="criminalTeamName">-</span></div>
-      <div id="criminalTimer" class="info-row"><span class="label">⏱️ Resterende tijd:</span><span class="value" id="criminalTimerValue">--:--</span></div>
-      <div id="criminalExtract" class="info-row"><span class="label">📍 Locatie:</span><span class="value" id="criminalExtractLoc">Onbekend</span></div>
-    </div>
-
-    <!-- WACHTMELDING -->
-    <div id="waitingMessage" class="card hidden">
-      <div class="waiting-message">⏳ Wachten tot de docent het spel start...</div>
-    </div>
-
-    <!-- MISSIE -->
-    <div class="card" id="missionCard">
-      <h2>📋 Huidige missie</h2>
-      <div id="missionCryptic" class="mission-box">
-        (Geen actieve missie)
-      </div>
-      <!-- Volledige opdracht (verborgen tot op locatie) -->
-      <div id="missionFull" class="mission-details hidden">
-        <strong>Opdracht:</strong> <span id="missionDescription"></span><br>
-        <div style="margin-top:8px; font-size:0.85rem; color:#8899aa;" id="missionProgress">
-          Afstand tot locatie: <span id="distanceDisplay">--</span> meter
+    <div id="app">
+        <!-- LOGIN -->
+        <div id="loginScreen" class="container">
+            <div class="card">
+                <h1>🕵️ Hunted</h1>
+                <p style="color:#8899aa;margin-bottom:16px;">Crimineel dashboard – Klasgebaseerd</p>
+                <div style="background:#0d1624;border-radius:8px;padding:12px;margin-bottom:16px;border-left:4px solid #f0c040;">
+                    <p><strong>👤 Crimineel:</strong> Je bent op de vlucht. Voltooi alle missies om te ontsnappen.</p>
+                    <p style="font-size:0.85rem;color:#8899aa;">Kies je klas, voer je teamnaam in en log in.</p>
+                </div>
+                <div class="form-group">
+                    <label>Kies je klas</label>
+                    <select id="classSelect">
+                        <option value="Alpha">Alpha</option>
+                        <option value="Bravo">Bravo</option>
+                        <option value="Charlie">Charlie</option>
+                        <option value="Delta">Delta</option>
+                        <option value="Echo">Echo</option>
+                        <option value="Foxtrot">Foxtrot</option>
+                        <option value="Golf">Golf</option>
+                        <option value="Hotel">Hotel</option>
+                        <option value="Juliett">Juliett</option>
+                        <option value="Kilo">Kilo</option>
+                        <option value="Mike">Mike</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Teamnaam / Gebruikersnaam</label>
+                    <input type="text" id="usernameInput" placeholder="Bijv. Team Alpha" />
+                </div>
+                <button class="btn btn-primary" id="loginBtn" style="width:100%;">🚀 Inloggen</button>
+                <div id="loginStatus" style="margin-top:12px;font-size:0.9rem;color:#8899aa;"></div>
+            </div>
         </div>
-        <!-- KAART -->
-        <div id="criminalMap"></div>
-        <div class="photo-upload-area" style="margin-top:8px;">
-          <input type="file" id="proofPhotoInput" accept="image/*" capture="environment" />
-          <button class="btn btn-success" id="uploadProofBtn">📷 Upload bewijs</button>
-          <span id="proofUploadStatus" style="font-size:0.8rem; color:#8899aa; align-self:center;"></span>
+
+        <!-- CRIMINEEL DASHBOARD -->
+        <div id="criminalScreen" class="container hidden">
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <h1 style="font-size:1.4rem;">👤 Crimineel</h1>
+                    <span class="badge badge-criminal" id="criminalStatusBadge">Op de vlucht</span>
+                </div>
+                <div id="criminalInfo" class="info-row"><span class="label">Team:</span><span class="value" id="criminalTeamName">-</span></div>
+                <div id="criminalTimer" class="info-row"><span class="label">⏱️ Resterende tijd:</span><span class="value" id="criminalTimerValue">--:--</span></div>
+                <div id="criminalMissionTimer" class="info-row"><span class="label">⏳ Missie timer:</span><span class="value" id="missionTimerDisplay">--:--</span></div>
+                <div id="criminalExtract" class="info-row"><span class="label">📍 Huidige missie:</span><span class="value" id="criminalExtractLoc">Wachten...</span></div>
+                <div class="mission-counter" id="missionCounter">Missie <strong id="currentMissionNum">0</strong> van <strong>8</strong></div>
+            </div>
+
+            <!-- WACHTMELDING -->
+            <div id="waitingMessage" class="card hidden">
+                <div class="waiting-message">⏳ Wachten tot de docent het spel start...</div>
+            </div>
+
+            <!-- MISSIE -->
+            <div class="card" id="missionCard">
+                <h2>📋 Huidige missie</h2>
+                <div id="missionCryptic" class="mission-box">(Geen actieve missie)</div>
+                <div id="missionFull" class="mission-details hidden">
+                    <strong>Opdracht:</strong> <span id="missionDescription"></span>
+                    <div id="spoorDisplay" class="spoor-box hidden"><strong>🔍 Spoor:</strong> <span id="spoorContent"></span></div>
+                    <div style="margin-top:8px;font-size:0.85rem;color:#8899aa;" id="missionProgress">
+                        Afstand tot locatie: <span id="distanceDisplay">--</span> meter
+                    </div>
+                    <div id="criminalMap"></div>
+                    <div class="photo-upload-area" style="margin-top:8px;">
+                        <input type="file" id="proofPhotoInput" accept="image/*" capture="environment" />
+                        <button class="btn btn-success" id="uploadProofBtn">📷 Upload bewijs</button>
+                        <span id="proofUploadStatus" style="font-size:0.8rem;color:#8899aa;align-self:center;"></span>
+                    </div>
+                    <div style="margin-top:8px;font-size:0.8rem;color:#667788;" id="autoAdvanceNotice">
+                        ⏱️ Na 6 minuten wordt automatisch doorgegaan.
+                    </div>
+                </div>
+                <div id="missionCompleteBanner" class="complete-banner hidden">
+                    <h2>✅ Missie voltooid!</h2>
+                    <p>Nieuwe missie wordt geladen...</p>
+                </div>
+            </div>
+
+            <!-- LIVE FOTO-FEED -->
+            <div class="card">
+                <h2>📸 Live foto-feed</h2>
+                <div id="photoFeed" class="photo-feed">Geen foto's.</div>
+                <div class="photo-upload-area">
+                    <input type="file" id="photoInput" accept="image/*" capture="environment" />
+                    <button class="btn btn-primary" id="uploadPhotoBtn">📷 Foto maken / uploaden</button>
+                    <span id="uploadStatus" style="font-size:0.8rem;color:#8899aa;align-self:center;"></span>
+                </div>
+            </div>
+
+            <!-- CHAT -->
+            <div class="card">
+                <h2>💬 Chat (publiek)</h2>
+                <div id="criminalChatMessages" class="chat-messages">Geen berichten.</div>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="criminalChatInput" placeholder="Bericht..." style="flex:1;" />
+                    <button class="btn btn-primary" id="criminalSendChatBtn">📤 Verstuur</button>
+                </div>
+            </div>
+
+            <button class="btn btn-danger" id="criminalLogoutBtn" style="width:100%;margin-top:8px;">🚪 Uitloggen</button>
         </div>
-      </div>
     </div>
 
-    <!-- LOCATIE-aanwijzing (bestaand) -->
-    <div class="card">
-      <h2>🗺️ Huidige aanwijzing</h2>
-      <div id="clueList">Geen aanwijzingen beschikbaar.</div>
-      <div class="form-group" style="margin-top:12px;">
-        <label>Voer het antwoord in</label>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="clueCodeInput" placeholder="Bijv. De Boekenberg" style="flex:1;" />
-          <button class="btn btn-success" id="submitClueBtn">✅ Verzend</button>
-        </div>
-      </div>
-    </div>
+    <script type="module">
+        // ============================================================
+        // IMPORTS
+        // ============================================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import {
+            getDatabase,
+            ref,
+            push,
+            set,
+            onValue,
+            remove,
+            get,
+            update,
+            query,
+            orderByChild,
+            limitToLast
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import {
+            getStorage,
+            ref as storageRef,
+            uploadBytes,
+            getDownloadURL
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 
-    <div class="card">
-      <h2>📸 Live foto-feed</h2>
-      <div id="photoFeed" class="photo-feed">Geen foto's.</div>
-      <div class="photo-upload-area">
-        <input type="file" id="photoInput" accept="image/*" capture="environment" />
-        <button class="btn btn-primary" id="uploadPhotoBtn">📷 Foto maken / uploaden</button>
-        <span id="uploadStatus" style="font-size:0.8rem; color:#8899aa; align-self:center;"></span>
-      </div>
-    </div>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB12mTMBnuxdC4W4htyFO_C7Dnh3maVKew",
+            authDomain: "decoroefening.firebaseapp.com",
+            databaseURL: "https://decoroefening-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "decoroefening",
+            storageBucket: "decoroefening.firebasestorage.app",
+            messagingSenderId: "945998495824",
+            appId: "1:945998495824:web:a76dc7519b3b262a021155"
+        };
 
-    <div class="card">
-      <h2>💬 Chat (publiek)</h2>
-      <div id="criminalChatMessages" class="chat-messages">Geen berichten.</div>
-      <div style="display:flex;gap:8px;">
-        <input type="text" id="criminalChatInput" placeholder="Bericht..." style="flex:1;" />
-        <button class="btn btn-primary" id="criminalSendChatBtn">📤 Verstuur</button>
-      </div>
-    </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
 
-    <button class="btn btn-danger" id="criminalLogoutBtn" style="width:100%;margin-top:8px;">🚪 Uitloggen</button>
-  </div>
-</div>
+        // ============================================================
+        // CONSTANTS
+        // ============================================================
+        const GAME_DURATION = 3600; // 60 minuten
+        const MISSION_RADIUS = 15; // meter
+        const MISSION_TIMEOUT = 360; // 6 minuten per missie
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+        // ============================================================
+        // MISSIE DATA (gebruiker's eigen missies)
+        // ============================================================
+        const MISSION_DATA = [{
+            "id": "mission1",
+            "order": 1,
+            "lat": 52.131168,
+            "lng": 5.365757,
+            "cryptic": "We krijgen zojuist een melding binnen van een verdachte situatie op de aangewezen locatie. Er zijn sterke aanwijzingen dat een criminele groepering ter plaatse is om een zojuist ingesloten handlanger op te pikken en te ontzetten. Meld OC signalement van deze persoon. Bevraag de getuigen naar signalementen en gestolen goederen. Noteer jullie bevindingen.",
+            "description": "Pik hier jullie handlanger op en neem het goud mee. Ik wil er zeker van zijn dat jullie alles hebben. Maak een foto van jullie team, met handlanger en het goud.",
+            "spoor": "Poster met mugshot : lowiekevanrubber.png\nSignalemen:\n-uiterlijk: Grijs, rubberen postuur, zeer fors gebouwd;\n- haardracht: opvallende, weelderige zwarte haardos met een dikke, donkere snor; \nkleding: voornamelijke grijze kleding; \n- accessoires: behangen met extreem veel 'blingbling'. Draagt meerdere gouden kettingen (waarvan één met handboeien-hanger), een opvallend gouden horloge om de linkerpols, gouden armbanden om de rechterpols en diverse glimmende ringen om de vingers.\nKettlebell wordt meegenomen"
+        }, {
+            "id": "mission2",
+            "order": 2,
+            "lat": 52.131752708465726,
+            "lng": 5.368489613802097,
+            "cryptic": "Alle eenheden regio Amersfoort/Leusden, aanvulling op de lopende drugsgerelateerde melding op het Sintelplein 2.\n\nSituatie: Omstanders melden zojuist een verdacht voertuig dat met draaiende motor stand-by staat in de directe omgeving van de doellocatie. Het vermoeden bestaat dat dit het vluchtvoertuig is voor de lopende transactie binnen.\n\nVoertuig & Signalement: Het betreft een snelle, sportieve matzwarte sedan (mogelijk BMW of Audi). Bij het voertuig staat een robuuste man die zich zenuwachtig ophoudt. Signalement: zwarte muts, legergroene jas en opvallend veel zware gouden kettingen en ringen.\n\nInstructie: Toon spoed. Eenheden dienen de mogelijke vluchtwegen rondom het Sintelplein direct dicht te zetten en het voertuig tactisch te benaderen. Houd rekening met een directe en agressieve vluchtpoging. Verdachten zijn vermoedelijk vuurwapengevaarlijk. Bevestig positie bij aankomst. Meld status van het voertuig uit RDW-gegevens.",
+            "description": "Luister goed. De deal op het Sintelplein in Leusden is bijna rond, maar we hebben een waterdicht plan nodig om daarna te verdwijnen. Zoek nu meteen een geschikt vluchtvoertuig uit—iets snels, betrouwbaars en krachtig genoeg om weg te komen als de grond te heet onder de voeten wordt.\n\nZorg dat de wagen klaarstaat en maak een foto van onze handlanger samen met het voertuig, zodat ik zeker weet dat alles volgens mijn instructies geregeld is. Geen excuses, geen fouten, anders zijn de consequenties voor jullie. Begrepen?",
+            "spoor": "Kentekenplaat op auto\nIn code hunters RDW check met voertuig genoteerd als gestolen"
+        }, {
+            "id": "mission3",
+            "order": 3,
+            "lat": 52.130733811829295,
+            "lng": 5.364181348595629,
+            "cryptic": "PRIO 1. Verzoek om assistentie. Melding van een vuurgevecht gaande op de [Locatie in Ede, bijv. Parkeerterrein Kernhem]. Meerdere verdachten, vuurwapengevaarlijk. Eenheden ter plaatse melden recent schotwisseling. Minimaal twee verdachten betrokken, een oudere man en een jongere man. Beiden dragen zwarte kleding. Een van de verdachten, een jonge man met een capuchon en sjaal, lijkt momenteel onbekwaam met zijn eigen vuurwapen en worstelt ermee. Benader met extreme voorzichtigheid. Eenheden met ballistische bescherming gewenst. Beschrijf de situatie aan de hand van de camerabeelden.",
+            "description": "Heren, de situatie op deze locatie vereist een directe aanpak; de tegenpartij weigert zich aan onze afspraken te houden. Jullie gaan daar nu naartoe in zwarte kleding om de boel recht te zetten en onze belangen te beschermen. Mocht er weerstand zijn, dan lossen jullie dat ter plekke en definitief op. En jij, jongeman—zorg dat je je wapen dit keer onder controle hebt en niet aarzelt als de eerste kogel moet vallen. Stel me niet teleur.",
+            "spoor": "afbeeldingen camerabeelden: \nincidentwapenkamer.png\nincidentwapenkamerhulzen.png"
+        }, {
+            "id": "mission4",
+            "order": 4,
+            "lat": 52.13080791024424,
+            "lng": 5.365163684943295,
+            "cryptic": "Aan alle beschikbare eenheden regio Ede. Prioriteit 1. Dringend verzoek om assistentie bij een ernstig verkeersongeval op de Loes van Overeemlaan, nabij bushalte Schietbaan, Leusden. \n\nSituatie: Een zwart voertuig is na extreem gevaarlijk rijgedrag met hoge snelheid frontaal in botsing gekomen met een Connexxion lijnbus (Lijn 88 richting Ede Station). Er is sprake van zware materiële schade aan zowel de bus als de personenauto. Mogelijk letsel bij de passagiers in de bus.\n\nBijzonderheden: Het zwarte voertuig matcht met de eerdere meldingen over het gevaarlijke vluchtgedrag. Meerdere getuigen ter plaatse melden dat de inzittenden van het voertuig op dit moment in alle haast tassen en goederen uit de auto aan het trekken zijn. Ze proberen de locatie te voet te ontvluchten nog vóór de aankomst van de eerste eenheden.\n\nInstructie: Met spoed aanrijden. Eenheden in de omgeving dienen direct de omliggende straten en vluchtwegen af te grendelen om de verdachten te onderscheppen. Ambulance en brandweer zijn met prioriteit onderweg voor de hulpverlening in de bus. Benader de verdachten met verhoogde waakzaamheid. Geef door waarheen de betrokkenen zijn gevlucht. Geef door hoe de betrokkenen zijn gevlucht.",
+            "description": "Luister goed. Er is een pakketje dat absoluut niet in de verkeerde handen mag vallen. De koerier heeft specifieke instructies gekregen: deze levering heeft prioriteit boven alles. Als er obstakels zijn, dan worden die omzeild. Als er vertraging dreigt, dan wordt er gas bijgegeven. Geen excuses, geen maren. Het belang van de familie staat op het spel. Zorg dat het aankomt, hoe dan ook..... Een ongeluk? Dit is exact het soort amateurisme waar ik een broertje dood aan heb. Ik vroeg om een snelle levering, niet om een mediaspektakel dat de hele politiemacht van de regio Amersfoort op onze nek haalt.\nAls dat pakketje nu door de recherche wordt gevonden, hebben die twee een veel groter probleem dan een paar gekneusde ribben. Zorg dat onze mensen ter plaatse zijn nog vóór de bergingsauto arriveert. De sporen moeten worden uitgewist, de auto moet leeg, en die twee malloten moeten verdwijnen uit het zicht van de autoriteiten. Incompetentie die de familie in gevaar brengt, tolereer ik niet. Regel het. Nu.",
+            "spoor": "Afbeelding ongeluk connexxionbus: verkeersongeluk.png"
+        }, {
+            "id": "mission5",
+            "order": 5,
+            "lat": 52.131571583234894,
+            "lng": 5.369203091268884,
+            "cryptic": "Aan alle beschikbare eenheden regio Leusden Prioriteit 1. Verzoek om onderzoek naar een verdachte situatie in een woning. Exacte adresgegevens volgen via de MDT.\n\nSituatie: Via een betrouwbare bron is informatie binnengekomen dat er op dit moment een illegale overdracht plaatsvindt in de woning. Er zou een ontmoeting gaande zijn tussen een bewoner/contactpersoon en externe partijen.\n\nBijzonderheden: De transactie betreft vermoedelijk de uitwisseling van gevoelige documenten tegen een substantiële hoeveelheid verdovende middelen (harddrugs, omschreven als 'poeder'), welke verpakt zouden zitten in een doos. Er is een reële kans dat de betrokkenen proberen de locatie snel te verlaten zodra de overdracht is afgerond.\n\nInstructie: Benader de woning onopvallend en tactisch. Stel eventuele vluchtwegen aan de achterzijde van het pand veilig alvorens aan te bellen. Houd rekening met de aanwezigheid van meerdere personen binnen. Beschrijf wat je binnen aantreft.",
+            "description": "Luister goed naar wat ik je nu ga zeggen. Op de afgesproken locatie staat een huis waar de documenten die we nodig hebben op je liggen te wachten. Dit zijn niet zomaar papieren; dit zijn de geheimen die onze positie veiligstellen.\n\nEr is binnen een contactpersoon aanwezig die precies weet waarom je komt. Je overhandigt de documenten, en in ruil daarvoor neem je onze specifieke hoeveelheid poeder mee... je weet precies wat ik bedoel, exact volgens de afspraak die we vooraf gemaakt hebben. Het staat klaar in de doos.\n\nGeen misverstanden, geen onnodige vragen. Je loopt naar binnen, handelt dit zakelijk af en zorgt dat alles geruisloos verloopt. Laat me zien dat ik op je kan rekenen. Succes.",
+            "spoor": "Lijk TLO\nDoos\nDrugs"
+        }, {
+            "id": "mission6",
+            "order": 6,
+            "lat": 52.1305771043951,
+            "lng": 5.3671699778875945,
+            "cryptic": "Aan alle beschikbare eenheden regio Ede. Prioriteit 2. Verzoek om controle bij een leegstaande loods. Exacte locatiegegevens volgen via de MDT.\n\nSituatie: Er is zojuist een melding binnengekomen over verdachte activiteit rondom een verlaten loods. Een passant zag een persoon zich verdacht ophouden aan de achterzijde van het pand en vervolgens een oude kelderruimte betreden.\n\nBijzonderheden: Vermoeden bestaat dat deze locatie wordt gebruikt voor het stallen of verbergen van illegale goederen of bewijsmateriaal (mogelijk documenten of administratie gerelateerd aan eerdere incidenten). Er is vooralsnog geen sprake van directe dreiging of wapens, maar alertheid is geboden.\n\nInstructie: Rijdt aan zonder optische en geluidssignalen om de verdachte niet op te schrikken. Benader de achterzijde en de kelderruimte van de loods tactisch. Controleer de ruimte op eventueel achtergelaten goederen of nog aanwezige personen. Stel sporen veilig. Beschrijf wat je aantreft.",
+            "description": "Luister goed. Het goud dat je zojuist hebt veiliggesteld is op dit moment ook levensgevaarlijk. De politie spit het hele Sintelplein binnenstebuiten en we kunnen geen enkel risico nemen.\n\nJe brengt het naar de oude kelderruimte achter de loods. Achter de derde steunpilaar zit een losse baksteen in de muur. Daar schuif je ze achter. Niemand komt daar, niemand zoekt daar. Als die papieren daar liggen, is het alsof ze nooit hebben bestaan.\n\nEn onthoud één ding: vanaf dit moment weet jij van niets, heb je niets gezien en ken je de naam van de contactpersoon niet meer. Als er ook maar één detail uitlekt naar de autoriteiten, dan weet je dat de familie dat niet ongestraft laat. Zorg dat het geregeld wordt, met de nodige discretie.",
+            "spoor": "Stapel stenen"
+        }, {
+            "id": "mission7",
+            "order": 7,
+            "lat": 52.1326780223426,
+            "lng": 5.368076571798458,
+            "cryptic": "Aan alle beschikbare eenheden regio Leusden Prioriteit 2. Verzoek om verhoogde surveillance en waakzaamheid rondom het bedrijfspand. Exacte objectgegevens volgen direct via de MDT.\n\nSituatie: Er is zojuist via een interne veiligheidslijn een melding binnengekomen over een verdachte ontmoeting nabij de personeelsingang van het object. Een onbekende man heeft daar contact gezocht met een van de aanwezige beveiligers.\n\nBijzonderheden: Het sterke vermoeden bestaat dat er sprake is van een poging tot omkoping of intimidatie van het beveiligingspersoneel ('platleggen' van de beveiliging) met het oog op een geplande inbraak of insluiping tijdens de avonduren. De beveiliger in kwestie wordt momenteel intern gehoord. Er is mogelijk een foto van de ontmoeting gemaakt door een handlanger in de buurt.\n\nInstructie: Neem het object en de directe omgeving op in de lopende surveillance voor de avond- en nachtdienst. Let specifiek op personen die zich ophouden rondom de camera-opstellingen of nooduitgangen. Meld eventuele verdachte voertuigen direct aan de meldkamer. Geef signalement van verdachte personen.",
+            "description": "Luister goed. Vanavond is de avond dat we het pand aan de binnenkant gaan bekijken, maar ik wil geen alarmbellen, geen honden en absoluut geen politie aan de deur. De beveiliging moet plat liggen nog vóór de zon ondergaat.\n\nEr loopt daar een bewaker rond die vatbaar is voor de juiste motivatie. Je zoekt hem op, je neemt hem apart en je zorgt ervoor dat hij inziet dat een goedgevulde envelop beter is voor zijn gezondheid en zijn portemonnee dan de held uithangen. Vertel hem precies hoe laat hij zijn ronde de andere kant op moet lopen en welke camera's er toevallig een uurtje 'storing' moeten hebben.\n\nEn ik wil bewijs dat de afspraak staat. Maak onopvallend een foto van de ontmoeting, zodat ik kan zien dat de deal gesloten is. Als die lichten vanavond uitgaan, slaan we onze slag. Zorg dat hij meewerkt—of zorg dat hij spijt krijgt dat hij ooit 'nee' heeft gezegd. Regel het.",
+            "spoor": "Geld voor corruptie\nEnvelop voor criminelen met Geheime documenten 'classified.pdf'"
+        }, {
+            "id": "mission8",
+            "order": 8,
+            "lat": 52.131564996774756,
+            "lng": 5.36609709267856,
+            "cryptic": "Aan alle eenheden regio en grensbewaking. Prioriteit 1. Verzoek om scherpe controle en uitkijken naar een verdachte die tracht het land te ontvluchten middels identiteitsfraude.\n\nSituatie: Uit tactische informatie is gebleken dat het subject, bekend onder de alias 'Lowieke van Rubber', actief bezig is met het aannemen van een valse identiteit. Er zijn aanwijzingen dat er vervalste reisbescheiden en pasfoto's zijn klaargemaakt voor internationale vluchten, met als vermoedelijke bestemmingen Tokyo of Rio de Janeiro.\n\nBijzonderheden: De verdachte maakt gebruik van hoogwaardig vervalste documenten en zal proberen de grenscontrole te passeren onder een gefingeerde naam. Het subject staat gesignaleerd.\n\nInstructie: Directe afstemming met de Koninklijke Marechaussee op de uitvalswegen en luchthavens. Bij aantreffen van personen die voldoen aan het signalement van de eerdere mugshots, direct overgaan tot staandehouding en verificatie van de biometrische gegevens. Benadering met verhoogde waakzaamheid. Maak een lijst op van reisplannen en bestemmingen.",
+            "description": "Luister goed naar me. De grond onder onze voeten wordt te heet. De recherche spit elk dossier door en die OC-meldingen bewijzen dat ze ons op het spoor zijn. Het is tijd voor het noodplan. Tokyo en Rio de Janeiro liggen klaar, maar je gaat niet als jezelf de grens over.\n\nLowieke van Rubber bestaat vanaf vandaag niet meer voor de douane. Je pakt die valse pasfoto's en de klaargemaakte reisbescheiden die we hebben gefabriceerd. Vanaf dit moment neem je de identiteit aan van de persoon op die papieren. Je leert zijn naam, zijn geboortedatum en zijn achtergrond uit je hoofd. Geen aarzeling bij de grenscontrole, geen zenuwachtig gedrag.\n\nAls ze je paspoort scannen, ben jij die ander. Je stapt dat vliegtuig in, laat je oude leven hier achter en zorgt dat je aan de andere kant van de wereld onder de radar verdwijnt. Identiteitsfraude is onze enige ticket naar vrijheid. Verpruts het niet, want een tweede kans krijg je niet van me. Verdwijn.",
+            "spoor": "reisbescheiden japan, Brazillië , alles\ndoos met reispapieren in Souterrain"
+        }];
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB12mTMBnuxdC4W4htyFO_C7Dnh3maVKew",
-    authDomain: "decoroefening.firebaseapp.com",
-    databaseURL: "https://decoroefening-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "decoroefening",
-    storageBucket: "decoroefening.firebasestorage.app",
-    messagingSenderId: "945998495824",
-    appId: "1:945998495824:web:a76dc7519b3b262a021155"
-  };
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const loginScreen = document.getElementById('loginScreen');
+        const criminalScreen = document.getElementById('criminalScreen');
+        const classSelect = document.getElementById('classSelect');
+        const usernameInput = document.getElementById('usernameInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginStatus = document.getElementById('loginStatus');
+        const photoInput = document.getElementById('photoInput');
+        const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const photoFeed = document.getElementById('photoFeed');
+        const waitingMessage = document.getElementById('waitingMessage');
+        const missionCryptic = document.getElementById('missionCryptic');
+        const missionFull = document.getElementById('missionFull');
+        const missionDescription = document.getElementById('missionDescription');
+        const spoorDisplay = document.getElementById('spoorDisplay');
+        const spoorContent = document.getElementById('spoorContent');
+        const distanceDisplay = document.getElementById('distanceDisplay');
+        const proofPhotoInput = document.getElementById('proofPhotoInput');
+        const uploadProofBtn = document.getElementById('uploadProofBtn');
+        const proofUploadStatus = document.getElementById('proofUploadStatus');
+        const criminalExtractLoc = document.getElementById('criminalExtractLoc');
+        const mapContainer = document.getElementById('criminalMap');
+        const missionTimerDisplay = document.getElementById('missionTimerDisplay');
+        const missionCounter = document.getElementById('missionCounter');
+        const currentMissionNum = document.getElementById('currentMissionNum');
+        const autoAdvanceNotice = document.getElementById('autoAdvanceNotice');
+        const missionCompleteBanner = document.getElementById('missionCompleteBanner');
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const storage = getStorage(app);
+        // ============================================================
+        // STATE
+        // ============================================================
+        let className = 'Alpha';
+        let teamName = '';
+        let gameStarted = false;
+        let watchPositionId = null;
+        let currentMissionId = null;
+        let currentMissionData = null;
+        let missionUnlocked = false;
+        let missionCompleted = false;
+        let playerRef = null;
+        let gameStatusRef = null;
+        let missionsRef = null;
+        let map = null;
+        let marker = null;
+        let circle = null;
+        let missionTimerInterval = null;
+        let missionStartTime = null;
+        let missionTimeoutId = null;
+        let isMissionActive = false;
+        let missionOrder = []; // ['mission1', 'mission2', ...] in volgorde
+        let missionIndex = 0;
+        let allMissionIds = [];
+        let pingTimer = null;
+        let isGameComplete = false;
 
-  const GAME_DURATION = 3600; // 60 minuten
-  const MISSION_RADIUS = 10; // meter
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function getTimestamp() { return Date.now(); }
 
-  // ----- Nieuwe missies (rechercheurthema) -----
-  const DEFAULT_MISSIONS = [
-    {
-      "id": "mission1",
-      "order": 1,
-      "lat": 52.131168,
-      "lng": 5.365757,
-      "cryptic": "Er is een handlanger die op de criminelen wacht. Noteer de daderkenmerken van de handlanger: Naam, geboortedatum en signalement.",
-      "description": "Pik hier jullie handlanger op. De handlanger mag onder geen enkele voorwaarde, tijdens jullie actie, de grond raken. Maak een foto van jullie team, met handlanger voor de schuilplaats van de handlanger."
-    },
-    {
-      "id": "mission2",
-      "order": 2,
-      "lat": 52.13157158531315,
-      "lng": 5.366080999232944,
-      "cryptic": "Er is een inbraak geplaagd? Zoek op plaats naar weggenomen goederen, sporen, schade feiten en omstandigheden.",
-      "description": "Breek de kluis open en ontvreem de examens."
-    },
-    {
-      "id": "mission3",
-      "order": 3,
-      "lat": 52.130893,
-      "lng": 5.364418,
-      "cryptic": "Stel de sporen veilig. Beschrijf het decor: Welke voorwerpen zie en waar bevinden de sporen zich.",
-      "description": "Jullie zijn vuurwapengevaarlijk. Laat zien dat jullie handlanger niet erg handig is met een vuurwapen."
-    },
-    {
-      "id": "mission4",
-      "order": 4,
-      "lat": 52.13063770774307,
-      "lng": 5.365244149989522,
-      "cryptic": "De vlucht van de criminelen heeft een ongeluk veroorzaakt. Beschrijf de plaats delict. Wel spoor vinden jullie? Waar ligt het spoor?",
-      "description": "Jullie vluchtgedrag is erg levensgevaarlijk! Jullie veroorzaakten een complex verkeersongeval. Een deel van de buit verliezen jullie. Laat een spoor achter. Als jullie plaats incident verlaten, ligt er een voorwerp van jullie. Denk aan een schoen, zakdoek, potje gel ... verzin het maar!"
-    },
-    {
-      "id": "mission5",
-      "order": 5,
-      "lat": 52.13062979171813,
-      "lng": 5.367057323459728,
-      "cryptic": "Hier zijn de criminelen geweest. Verzamel de sporen.",
-      "description": "Hier kunnen jullie schuilen. Rust lekker uit. Neem de tijd.... of zitten de hunters jullie al op de hielen?"
-    },
-    {
-      "id": "mission6",
-      "order": 6,
-      "lat": 52.131564999440904,
-      "lng": 5.369160175495069,
-      "cryptic": "Plaats delict. Beschrijf wat je ziet. Noteer de feiten en omstandigheden van een strafbaar feit.",
-      "description": "Hier vindt de overdracht plaats. Lever de examens in en neem de beloning in ontvangst."
-    },
-    {
-      "id": "mission7",
-      "order": 7,
-      "lat": 52.13156499941543,
-      "lng": 5.368258953230015,
-      "cryptic": "De handlanger moet contact opnemen met een persoon. Een foto van de ontmoeting is vereist.",
-      "description": "De handlanger heeft een contactpersoon. Maak een foto van de ontmoeting."
-    },
-    {
-      "id": "mission8",
-      "order": 8,
-      "lat": 52.13,
-      "lng": 5.367,
-      "cryptic": "De criminelen hebben een schuilplaats gebruikt. Zoek naar sporen van verblijf: resten van eten, gebruikte voorwerpen, of andere aanwijzingen. Noteer de locatie en de gevonden sporen.",
-      "description": "Zoek een schuilplaats voor de nacht. Laat een spoor achter dat jullie hier zijn geweest (bijv. een gebruikte verpakking, een sigaret, etc.). Maak een foto van de schuilplaats."
-    },
-    {
-      "id": "mission9",
-      "order": 9,
-      "lat": 52.132,
-      "lng": 5.365,
-      "cryptic": "Er is een plaats delict waar sporen zijn uitgewist. Zoek naar restanten van sporen of aanwijzingen dat er is schoongemaakt. Beschrijf wat je ziet.",
-      "description": "De achtervolging is ingezet. Jullie moeten sporen uitwissen. Verwijder zoveel mogelijk sporen op de plaats delict (bijv. vegen, schoonmaken). Maak een foto van het schoongemaakte terrein."
-    },
-    {
-      "id": "mission10",
-      "order": 10,
-      "lat": 52.1318,
-      "lng": 5.3685,
-      "cryptic": "Er is een geheime code achtergelaten. Zoek naar de code en noteer deze. De code kan aanwijzingen geven over de volgende stap.",
-      "description": "De documenten bevatten een geheime code. Noteer de code en verstop hem op een veilige plek. Maak een foto van de verstopte code."
-    },
-    {
-      "id": "mission11",
-      "order": 11,
-      "lat": 52.13280971740192,
-      "lng": 5.367529392366214,
-      "cryptic": "Er is een checkpoint waar omkoping heeft plaatsgevonden. Onderzoek de wacht en zoek naar bewijzen van omkoping (bijv. vals geld, nepvoorwerp).",
-      "description": "Er is een checkpoint. Omkoop de wacht door hem een vals briefje of een nepvoorwerp te geven. Maak een foto van de omkoping."
-    },
-    {
-      "id": "mission12",
-      "order": 12,
-      "lat": 52.131,
-      "lng": 5.3675,
-      "cryptic": "Er heeft een overdracht van documenten plaatsgevonden. Zoek naar de locatie van de overdracht en eventuele getuigen of sporen.",
-      "description": "Overhandig de documenten aan de opdrachtgever. Maak een foto van de overhandiging en noteer de ontmoetingsplek."
-    },
-    {
-      "id": "mission13",
-      "order": 13,
-      "lat": 52.1325,
-      "lng": 5.3665,
-      "cryptic": "De criminelen hebben een wapen getoond als teken van loyaliteit. Zoek naar het wapen of sporen ervan. Noteer het type wapen.",
-      "description": "Toon jullie loyaliteit aan de opdrachtgever door een wapen te tonen. Maak een foto van jullie team met het wapen."
-    },
-    {
-      "id": "mission14",
-      "order": 14,
-      "lat": 52.1308,
-      "lng": 5.3682,
-      "cryptic": "De criminelen bereiden een ontsnapping per helikopter voor. Lokaliseer de helikopter en probeer de ontsnapping te voorkomen.",
-      "description": "Einddoel: ontsnapping per helikopter. Zorg dat de helikopter klaarstaat en maak een foto van de helikopter."
-    }
-  ];
+        function deg2rad(deg) { return deg * (Math.PI / 180); }
 
-  // DOM refs
-  const loginScreen = document.getElementById('loginScreen');
-  const criminalScreen = document.getElementById('criminalScreen');
-  const classSelect = document.getElementById('classSelect');
-  const usernameInput = document.getElementById('usernameInput');
-  const loginBtn = document.getElementById('loginBtn');
-  const loginStatus = document.getElementById('loginStatus');
-  const photoInput = document.getElementById('photoInput');
-  const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
-  const uploadStatus = document.getElementById('uploadStatus');
-  const photoFeed = document.getElementById('photoFeed');
-  const waitingMessage = document.getElementById('waitingMessage');
-  const missionCryptic = document.getElementById('missionCryptic');
-  const missionFull = document.getElementById('missionFull');
-  const missionDescription = document.getElementById('missionDescription');
-  const distanceDisplay = document.getElementById('distanceDisplay');
-  const proofPhotoInput = document.getElementById('proofPhotoInput');
-  const uploadProofBtn = document.getElementById('uploadProofBtn');
-  const proofUploadStatus = document.getElementById('proofUploadStatus');
-  const criminalExtractLoc = document.getElementById('criminalExtractLoc');
-  const mapContainer = document.getElementById('criminalMap');
+        function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
 
-  let className = 'Alpha';
-  let pingTimer = null;
-  let teamName = '';
-  let gameStarted = false;
-  let watchPositionId = null;
-  let currentMissionId = null;
-  let currentMissionData = null;
-  let missionUnlocked = false;
-  let missionsRef = null;
-  let playerRef = null;
-  let gameStatusRef = null;
-  let map = null;
-  let marker = null;
-  let circle = null;
+        function formatTime(seconds) {
+            if (seconds < 0) seconds = 0;
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+        }
 
-  function setStatus(el, msg, type = 'info') {
-    el.textContent = msg;
-    el.className = type;
-  }
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
 
-  function showScreen(screenId) {
-    [loginScreen, criminalScreen].forEach(s => s.classList.add('hidden'));
-    document.getElementById(screenId).classList.remove('hidden');
-  }
+        function setStatus(el, msg, type = 'info') {
+            el.textContent = msg;
+            el.className = type;
+        }
 
-  function getTimestamp() { return Date.now(); }
+        function showScreen(screenId) {
+            [loginScreen, criminalScreen].forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
 
-  function updateTimer(elementId, className) {
-    const el = document.getElementById(elementId);
-    if (!el || !className) return;
-    get(ref(db, `klassen/${className}/game/startTime`)).then(snapshot => {
-      const start = snapshot.val();
-      if (!start) {
-        el.textContent = '--:--';
-        return;
-      }
-      const elapsed = Math.floor((Date.now() - start) / 1000);
-      const remaining = Math.max(0, GAME_DURATION - elapsed);
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
-      el.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    });
-  }
+        // ============================================================
+        // TIMER (algemeen)
+        // ============================================================
+        function updateGlobalTimer() {
+            const el = document.getElementById('criminalTimerValue');
+            if (!el || !className) return;
+            get(ref(db, `klassen/${className}/game/startTime`)).then(snapshot => {
+                const start = snapshot.val();
+                if (!start) { el.textContent = '--:--'; return; }
+                const elapsed = Math.floor((Date.now() - start) / 1000);
+                const remaining = Math.max(0, GAME_DURATION - elapsed);
+                el.textContent = formatTime(remaining);
+                if (remaining <= 0) {
+                    el.classList.add('timer-warning');
+                } else {
+                    el.classList.remove('timer-warning');
+                }
+            });
+        }
 
-  function logout() {
-    if (pingTimer) clearTimeout(pingTimer);
-    if (watchPositionId) navigator.geolocation.clearWatch(watchPositionId);
-    showScreen('loginScreen');
-    setStatus(loginStatus, 'Uitgelogd.', 'info');
-  }
+        // ============================================================
+        // MISSIE TIMER (6 minuten)
+        // ============================================================
+        function startMissionTimer() {
+            if (missionTimerInterval) clearInterval(missionTimerInterval);
+            if (missionTimeoutId) clearTimeout(missionTimeoutId);
+            missionStartTime = Date.now();
+            missionTimerInterval = setInterval(() => {
+                if (!missionStartTime) return;
+                const elapsed = (Date.now() - missionStartTime) / 1000;
+                const remaining = Math.max(0, MISSION_TIMEOUT - elapsed);
+                missionTimerDisplay.textContent = formatTime(remaining);
+                if (remaining <= 0) {
+                    missionTimerDisplay.classList.add('timer-warning');
+                } else {
+                    missionTimerDisplay.classList.remove('timer-warning');
+                }
+            }, 500);
 
-  // --------------------- LOGIN ---------------------
-  loginBtn.addEventListener('click', async () => {
-    const name = usernameInput.value.trim();
-    className = classSelect.value;
+            // Harde 6-minuut timeout
+            missionTimeoutId = setTimeout(() => {
+                if (!missionCompleted && isMissionActive) {
+                    console.log('⏰ 6 minuten verstreken, automatisch door naar volgende missie');
+                    autoAdvanceMission();
+                }
+            }, MISSION_TIMEOUT * 1000);
+        }
 
-    if (!name) {
-      setStatus(loginStatus, 'Voer een teamnaam in.', 'error');
-      return;
-    }
+        function stopMissionTimer() {
+            if (missionTimerInterval) { clearInterval(missionTimerInterval);
+                missionTimerInterval = null; }
+            if (missionTimeoutId) { clearTimeout(missionTimeoutId);
+                missionTimeoutId = null; }
+            missionTimerDisplay.textContent = '--:--';
+            missionTimerDisplay.classList.remove('timer-warning');
+            missionStartTime = null;
+        }
 
-    setStatus(loginStatus, '🔄 Inloggen...', 'info');
+        // ============================================================
+        // MAP
+        // ============================================================
+        function initMap() {
+            if (!map) {
+                map = L.map('criminalMap').setView([52.13, 5.366], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+            }
+            return map;
+        }
 
-    try {
-      playerRef = ref(db, `klassen/${className}/players/${name}`);
-      const snapshot = await get(playerRef);
-      if (snapshot.exists()) {
-        setStatus(loginStatus, '❌ Deze teamnaam is al in gebruik in deze klas.', 'error');
-        return;
-      }
+        function updateMap(lat, lng) {
+            const m = initMap();
+            if (marker) { m.removeLayer(marker);
+                marker = null; }
+            if (circle) { m.removeLayer(circle);
+                circle = null; }
+            if (lat && lng) {
+                marker = L.marker([lat, lng]).addTo(m)
+                    .bindPopup(`<strong>📍 Missielocatie</strong><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                circle = L.circle([lat, lng], {
+                    color: '#f0c040',
+                    fillColor: '#f0c040',
+                    fillOpacity: 0.2,
+                    radius: MISSION_RADIUS
+                }).addTo(m);
+                m.setView([lat, lng], 16);
+                setTimeout(() => m.invalidateSize(), 150);
+            }
+        }
 
-      const playerData = {
-        role: 'criminal',
-        teamName: name,
-        className: className,
-        joinedAt: getTimestamp(),
-        status: 'on_the_run',
-        cluesFound: [],
-        isArrested: false,
-        extractReached: false,
-        currentLocationId: null,
-        completedLocations: [],
-        hunterTimerEnd: null,
-        locationStartTime: null,
-        completedMissions: [],
-        currentMissionId: null
-      };
-      await set(playerRef, playerData);
+        // ============================================================
+        // MISSIE LOGICA
+        // ============================================================
+        function getMissionById(id) {
+            return MISSION_DATA.find(m => m.id === id) || null;
+        }
 
-      teamName = name;
-      setStatus(loginStatus, `✅ Ingelogd als crimineel in klas ${className}`, 'success');
-      showScreen('criminalScreen');
-      initCriminalDashboard(teamName, className);
-    } catch (err) {
-      setStatus(loginStatus, '❌ Fout bij inloggen: ' + err.message, 'error');
-    }
-  });
+        function buildMissionOrder() {
+            // mission1 altijd eerst, dan de rest (2-8) in willekeurige volgorde
+            const first = MISSION_DATA.filter(m => m.id === 'mission1');
+            const rest = MISSION_DATA.filter(m => m.id !== 'mission1');
+            const shuffled = shuffleArray([...rest]);
+            const order = [...first, ...shuffled];
+            return order.map(m => m.id);
+        }
 
-  // --------------------- CRIMINEEL DASHBOARD ---------------------
-  function initCriminalDashboard(teamName, className) {
-    updateTimer('criminalTimerValue', className);
-    setInterval(() => updateTimer('criminalTimerValue', className), 1000);
+        async function assignNextMission() {
+            if (isGameComplete) return;
 
-    document.getElementById('criminalTeamName').textContent = teamName + ' (' + className + ')';
+            const playerSnap = await get(playerRef);
+            const player = playerSnap.val();
+            if (!player) return;
 
-    const locRef = ref(db, `klassen/${className}/locations`);
-    playerRef = ref(db, `klassen/${className}/players/${teamName}`);
-    gameStatusRef = ref(db, `klassen/${className}/game/status`);
-    missionsRef = ref(db, `klassen/${className}/missions`);
+            // Bepaal welke missies al voltooid zijn
+            const completed = player.completedMissions || [];
 
-    // Initialiseer kaart (éénmalig)
-    if (!map) {
-      map = L.map('criminalMap').setView([52.0, 5.0], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
-    }
+            // Vind de eerstvolgende missie in de volgorde die nog niet voltooid is
+            let nextId = null;
+            for (const id of missionOrder) {
+                if (!completed.includes(id)) {
+                    nextId = id;
+                    break;
+                }
+            }
 
-    // Wacht op game status
-    onValue(gameStatusRef, (snapshot) => {
-      const status = snapshot.val();
-      if (status === 'running') {
-        gameStarted = true;
-        waitingMessage.classList.add('hidden');
-        startGameplay();
-      } else {
-        gameStarted = false;
-        waitingMessage.classList.remove('hidden');
-        if (pingTimer) { clearTimeout(pingTimer); pingTimer = null; }
-      }
-    });
+            if (!nextId) {
+                // Alle missies voltooid!
+                isGameComplete = true;
+                missionCryptic.textContent = '🏆 Gefeliciteerd! Je hebt alle missies voltooid en bent ontsnapt!';
+                missionFull.classList.add('hidden');
+                missionCompleteBanner.classList.remove('hidden');
+                missionCompleteBanner.innerHTML = `
+                    <h2>🏆 ONTSNAPT!</h2>
+                    <p>Je hebt alle 8 missies succesvol afgerond. De hunters kunnen je niet meer pakken!</p>
+                `;
+                criminalExtractLoc.textContent = '🏆 Ontsnapt!';
+                document.getElementById('criminalStatusBadge').textContent = '✅ Ontsnapt';
+                document.getElementById('criminalStatusBadge').className = 'badge badge-success';
+                stopMissionTimer();
+                if (watchPositionId) { navigator.geolocation.clearWatch(watchPositionId);
+                    watchPositionId = null; }
+                await update(playerRef, { extractReached: true, status: 'escaped' });
+                return;
+            }
 
-    // Missie listener: als de speler een missie heeft, toon deze
-    onValue(playerRef, (snapshot) => {
-      const player = snapshot.val();
-      if (!player) return;
-      if (player.currentMissionId) {
-        currentMissionId = player.currentMissionId;
-        // Haal missiegegevens op
-        get(ref(db, `klassen/${className}/missions/${currentMissionId}`)).then(missionSnap => {
-          const mission = missionSnap.val();
-          if (mission) {
+            // Volgende missie toewijzen
+            await update(playerRef, { currentMissionId: nextId });
+        }
+
+        async function loadMission(missionId) {
+            const mission = getMissionById(missionId);
+            if (!mission) {
+                console.error('Missie niet gevonden:', missionId);
+                return;
+            }
+
+            currentMissionId = missionId;
             currentMissionData = mission;
-            missionCryptic.textContent = mission.cryptic || 'Geen cryptische omschrijving.';
+            missionCompleted = false;
+            missionUnlocked = false;
+            isMissionActive = true;
+
+            // Toon cryptische omschrijving
+            missionCryptic.textContent = mission.cryptic || 'Geen omschrijving.';
             missionDescription.textContent = mission.description || 'Geen omschrijving.';
+
+            // Toon spoor
+            if (mission.spoor) {
+                spoorDisplay.classList.remove('hidden');
+                spoorContent.textContent = mission.spoor;
+            } else {
+                spoorDisplay.classList.add('hidden');
+            }
+
             // Verberg volledige opdracht tot op locatie
             missionFull.classList.add('hidden');
-            missionUnlocked = false;
-            // Toon de locatiebeschrijving en coördinaten in de info-balk
-            criminalExtractLoc.innerHTML = `📍 <strong>${mission.description}</strong><br>🗺️ Coördinaten: ${mission.lat.toFixed(6)}, ${mission.lng.toFixed(6)}`;
-            // Update kaart met missielocatie
+            missionCompleteBanner.classList.add('hidden');
+
+            // Update locatie in header
+            const idx = missionOrder.indexOf(missionId) + 1;
+            const total = missionOrder.length;
+            currentMissionNum.textContent = idx;
+            criminalExtractLoc.textContent = `📍 ${mission.description.substring(0, 50)}...`;
+
+            // Update kaart
             updateMap(mission.lat, mission.lng);
-            // Start tracking voor deze missie
-            if (gameStarted) {
-              startMissionTracking(mission);
+
+            // Start tracking
+            startLocationTracking(mission);
+
+            // Start missie timer (6 min)
+            stopMissionTimer();
+            startMissionTimer();
+
+            // Stuur een chatbericht dat de missie is toegewezen
+            const chatsRef = ref(db, `klassen/${className}/chats`);
+            await push(chatsRef, {
+                sender: '🕵️ Opdrachtgever',
+                text: `📨 Nieuwe missie: ${mission.cryptic.substring(0, 80)}... Ga naar de locatie!`,
+                timestamp: getTimestamp(),
+                isSystem: true
+            });
+
+            // Zet status
+            missionFull.querySelector('.photo-upload-area').style.display = 'flex';
+            proofUploadStatus.textContent = '';
+            uploadProofBtn.disabled = false;
+            autoAdvanceNotice.style.display = 'block';
+
+            // Update in Firebase dat de speler deze missie heeft
+            await update(playerRef, { currentMissionId: missionId });
+        }
+
+        // ============================================================
+        // LOCATIE TRACKING
+        // ============================================================
+        function startLocationTracking(mission) {
+            if (!mission || !mission.lat || !mission.lng) return;
+            if (watchPositionId) navigator.geolocation.clearWatch(watchPositionId);
+
+            if (!navigator.geolocation) {
+                distanceDisplay.textContent = '❌ Geolocatie niet ondersteund';
+                return;
             }
-          }
-        });
-      } else {
-        // Geen missie toegewezen, maar spel is gestart -> wijs een missie toe
-        if (gameStarted) {
-          assignNewMission();
-        }
-      }
-    });
 
-    function updateMap(lat, lng) {
-      if (!map) return;
-      if (marker) map.removeLayer(marker);
-      if (circle) map.removeLayer(circle);
-      marker = L.marker([lat, lng]).addTo(map)
-        .bindPopup(`<strong>Missielocatie</strong><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-      circle = L.circle([lat, lng], {
-        color: '#f0c040',
-        fillColor: '#f0c040',
-        fillOpacity: 0.2,
-        radius: MISSION_RADIUS
-      }).addTo(map);
-      map.setView([lat, lng], 15);
-      setTimeout(() => map.invalidateSize(), 100);
-    }
+            // Eerste check
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const dist = getDistanceFromLatLonInMeters(pos.coords.latitude, pos.coords.longitude, mission.lat, mission
+                        .lng);
+                    distanceDisplay.textContent = Math.round(dist);
+                    checkProximity(dist);
+                },
+                (err) => { console.warn('Positie error:', err);
+                    distanceDisplay.textContent = '?'; },
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
 
-    async function startGameplay() {
-      const snapshot = await get(playerRef);
-      const player = snapshot.val();
-      if (player && !player.currentMissionId) {
-        await assignNewMission();
-      }
-      schedulePing();
-    }
-
-    // --------------------- MISSIE TOEWIJZEN ---------------------
-    async function assignNewMission() {
-      const missionsSnap = await get(missionsRef);
-      const missions = missionsSnap.val();
-      if (!missions) {
-        setStatus(missionCryptic, 'Geen missies beschikbaar.', 'error');
-        return;
-      }
-
-      const playerSnap = await get(playerRef);
-      const player = playerSnap.val();
-      const completed = player.completedMissions || [];
-
-      const available = Object.keys(missions).filter(id => !completed.includes(id));
-      if (available.length === 0) {
-        missionCryptic.textContent = '🏆 Je hebt alle missies voltooid! Je bent ontsnapt!';
-        missionFull.classList.add('hidden');
-        criminalExtractLoc.textContent = '🏆 Alle missies voltooid!';
-        await update(playerRef, { extractReached: true });
-        return;
-      }
-
-      const randomId = available[Math.floor(Math.random() * available.length)];
-      const mission = missions[randomId];
-      await update(playerRef, { currentMissionId: randomId });
-    }
-
-    // --------------------- MISSIE TRACKING (locatie) ---------------------
-    function startMissionTracking(mission) {
-      if (!mission || !mission.lat || !mission.lng) return;
-      if (watchPositionId) navigator.geolocation.clearWatch(watchPositionId);
-      if (!navigator.geolocation) {
-        setStatus(document.getElementById('missionProgress'), 'Geolocatie niet ondersteund.', 'error');
-        return;
-      }
-
-      // Controleer meteen de huidige positie
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          const distance = getDistanceFromLatLonInMeters(lat, lng, mission.lat, mission.lng);
-          distanceDisplay.textContent = Math.round(distance);
-          if (distance <= MISSION_RADIUS && !missionUnlocked) {
-            missionUnlocked = true;
-            missionFull.classList.remove('hidden');
-            setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en upload het bewijs.', 'success');
-          }
-        },
-        (error) => {
-          console.warn('Initial position error:', error);
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-
-      // Start continue watch
-      watchPositionId = navigator.geolocation.watchPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          const distance = getDistanceFromLatLonInMeters(lat, lng, mission.lat, mission.lng);
-          distanceDisplay.textContent = Math.round(distance);
-          if (distance <= MISSION_RADIUS && !missionUnlocked) {
-            missionUnlocked = true;
-            missionFull.classList.remove('hidden');
-            setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en upload het bewijs.', 'success');
-          }
-        },
-        (error) => {
-          console.warn('Geolocation error:', error);
-          distanceDisplay.textContent = '?';
-        },
-        { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
-      );
-    }
-
-    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371000;
-      const dLat = deg2rad(lat2 - lat1);
-      const dLon = deg2rad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    function deg2rad(deg) {
-      return deg * (Math.PI / 180);
-    }
-
-    // --------------------- BEWIJSFOTO UPLOADEN ---------------------
-    const photosRef = ref(db, `klassen/${className}/photos`);
-
-    async function uploadProofPhoto(file) {
-      if (!file) return;
-      if (!currentMissionId) {
-        setStatus(proofUploadStatus, '⚠️ Geen actieve missie.', 'error');
-        return;
-      }
-      setStatus(proofUploadStatus, '⏳ Uploaden...', 'info');
-      try {
-        const fileName = `proof_${Date.now()}_${file.name}`;
-        const storageReference = storageRef(storage, `klassen/${className}/proofs/${fileName}`);
-        await uploadBytes(storageReference, file);
-        const downloadURL = await getDownloadURL(storageReference);
-        await push(photosRef, {
-          uploader: teamName + ' (C)',
-          imageUrl: downloadURL,
-          timestamp: getTimestamp(),
-          type: 'proof',
-          missionId: currentMissionId
-        });
-        setStatus(proofUploadStatus, '✅ Bewijs geüpload!', 'success');
-
-        const playerSnap = await get(playerRef);
-        const player = playerSnap.val();
-        const completed = player.completedMissions || [];
-        if (!completed.includes(currentMissionId)) {
-          completed.push(currentMissionId);
-          await update(playerRef, {
-            completedMissions: completed,
-            currentMissionId: null
-          });
-        }
-        missionUnlocked = false;
-        missionFull.classList.add('hidden');
-        missionCryptic.textContent = 'Missie voltooid! Nieuwe missie wordt toegewezen...';
-        criminalExtractLoc.textContent = 'Missie voltooid! Nieuwe missie wordt toegewezen...';
-        await assignNewMission();
-      } catch (err) {
-        setStatus(proofUploadStatus, '❌ Fout: ' + err.message, 'error');
-      }
-    }
-
-    uploadProofBtn.addEventListener('click', () => {
-      if (!missionUnlocked) {
-        setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning');
-        return;
-      }
-      proofPhotoInput.click();
-    });
-
-    proofPhotoInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        uploadProofPhoto(file);
-      }
-      proofPhotoInput.value = '';
-    });
-
-    // Antwoord verzenden (bestaand)
-    document.getElementById('submitClueBtn').addEventListener('click', async () => {
-      if (!gameStarted) {
-        setStatus(document.getElementById('criminalChatMessages'), '⏳ Het spel is nog niet gestart!', 'warning');
-        return;
-      }
-      const answer = document.getElementById('clueCodeInput').value.trim();
-      if (!answer) {
-        setStatus(document.getElementById('criminalChatMessages'), 'Voer een antwoord in.', 'error');
-        return;
-      }
-
-      const snapshot = await get(playerRef);
-      const player = snapshot.val();
-      if (!player || !player.currentLocationId) {
-        setStatus(document.getElementById('criminalChatMessages'), 'Je hebt momenteel geen locatie.', 'error');
-        return;
-      }
-
-      const locSnapshot = await get(locRef);
-      const locations = locSnapshot.val();
-      if (!locations) {
-        setStatus(document.getElementById('criminalChatMessages'), 'Geen locaties gevonden.', 'error');
-        return;
-      }
-
-      const currentLoc = locations[player.currentLocationId];
-      if (!currentLoc) {
-        setStatus(document.getElementById('criminalChatMessages'), 'Locatie niet gevonden.', 'error');
-        return;
-      }
-
-      if (answer.toLowerCase() === currentLoc.answer.toLowerCase()) {
-        const now = Date.now();
-        await update(playerRef, { hunterTimerEnd: now });
-
-        const completed = player.completedLocations || [];
-        if (!completed.includes(player.currentLocationId)) {
-          completed.push(player.currentLocationId);
-          await update(playerRef, { completedLocations: completed });
+            // Continue tracking
+            watchPositionId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    const dist = getDistanceFromLatLonInMeters(pos.coords.latitude, pos.coords.longitude, mission.lat, mission
+                        .lng);
+                    distanceDisplay.textContent = Math.round(dist);
+                    checkProximity(dist);
+                },
+                (err) => { console.warn('Watch error:', err);
+                    distanceDisplay.textContent = '?'; },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+            );
         }
 
-        setStatus(document.getElementById('criminalChatMessages'), '✅ Juist antwoord! Nieuwe locatie komt eraan.', 'success');
-        document.getElementById('clueCodeInput').value = '';
-        await assignNewLocation();
-      } else {
-        setStatus(document.getElementById('criminalChatMessages'), '❌ Fout antwoord, probeer opnieuw.', 'error');
-      }
-    });
+        function checkProximity(distance) {
+            if (missionCompleted || !isMissionActive) return;
+            if (distance <= MISSION_RADIUS && !missionUnlocked) {
+                missionUnlocked = true;
+                missionFull.classList.remove('hidden');
+                // Toon de volledige opdracht nu
+                missionDescription.textContent = currentMissionData.description;
+                if (currentMissionData.spoor) {
+                    spoorDisplay.classList.remove('hidden');
+                    spoorContent.textContent = currentMissionData.spoor;
+                }
+                setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en upload het bewijs.',
+                    'success');
+                // Stuur chat dat ze bij de locatie zijn
+                const chatsRef = ref(db, `klassen/${className}/chats`);
+                push(chatsRef, {
+                    sender: '📍 Locatie',
+                    text: `✅ Team is aangekomen bij de missielocatie: ${currentMissionData.id}`,
+                    timestamp: getTimestamp(),
+                    isSystem: true
+                });
+            }
+        }
 
-    async function assignNewLocation() {
-      // (bestaande functie – niet gewijzigd)
-    }
+        // ============================================================
+        // BEWIJS FOTO UPLOADEN
+        // ============================================================
+        async function uploadProofPhoto(file) {
+            if (!file) return;
+            if (!currentMissionId || missionCompleted || !isMissionActive) {
+                setStatus(proofUploadStatus, '⚠️ Geen actieve missie.', 'error');
+                return;
+            }
+            if (!missionUnlocked) {
+                setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning');
+                return;
+            }
 
-    // Chat
-    const chatsRef = ref(db, `klassen/${className}/chats`);
-    onValue(chatsRef, (snapshot) => {
-      const data = snapshot.val();
-      const chatDiv = document.getElementById('criminalChatMessages');
-      if (!data) {
-        chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>';
-        return;
-      }
-      let html = '';
-      const keys = Object.keys(data).sort((a,b) => data[a].timestamp - data[b].timestamp);
-      for (const key of keys) {
-        const msg = data[key];
-        html += `
-          <div class="chat-message">
-            <span class="sender">${msg.sender || 'Onbekend'}:</span>
-            <span>${msg.text}</span>
-            <span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-          </div>
-        `;
-      }
-      chatDiv.innerHTML = html || '<div style="color:#8899aa;">Geen berichten.</div>';
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    });
+            setStatus(proofUploadStatus, '⏳ Uploaden...', 'info');
+            uploadProofBtn.disabled = true;
 
-    document.getElementById('criminalSendChatBtn').addEventListener('click', async () => {
-      const text = document.getElementById('criminalChatInput').value.trim();
-      if (!text) return;
-      await push(chatsRef, {
-        sender: teamName + ' (C)',
-        text: text,
-        timestamp: getTimestamp()
-      });
-      document.getElementById('criminalChatInput').value = '';
-    });
+            try {
+                const fileName = `proof_${Date.now()}_${file.name}`;
+                const storageReference = storageRef(storage, `klassen/${className}/proofs/${fileName}`);
+                await uploadBytes(storageReference, file);
+                const downloadURL = await getDownloadURL(storageReference);
 
-    // Pings
-    function sendPing() {
-      const lat = 52.0 + Math.random() * 0.1;
-      const lng = 5.0 + Math.random() * 0.1;
-      push(ref(db, `klassen/${className}/pings`), {
-        teamName: teamName,
-        latitude: lat,
-        longitude: lng,
-        timestamp: getTimestamp()
-      }).catch(err => console.warn('Ping mislukt:', err));
-    }
+                const photosRef = ref(db, `klassen/${className}/photos`);
+                await push(photosRef, {
+                    uploader: `${teamName} (C)`,
+                    imageUrl: downloadURL,
+                    timestamp: getTimestamp(),
+                    type: 'proof',
+                    missionId: currentMissionId,
+                    missionDescription: currentMissionData?.description?.substring(0, 100) || ''
+                });
 
-    function schedulePing() {
-      if (pingTimer) clearTimeout(pingTimer);
-      const interval = Math.floor(Math.random() * (15 * 60 * 1000 - 2 * 60 * 1000) + 2 * 60 * 1000);
-      pingTimer = setTimeout(() => {
-        sendPing();
-        schedulePing();
-      }, interval);
-    }
+                setStatus(proofUploadStatus, '✅ Bewijs geüpload! Missie voltooid.', 'success');
+                missionCompleted = true;
+                isMissionActive = false;
+                missionFull.classList.add('hidden');
+                missionCompleteBanner.classList.remove('hidden');
+                missionCompleteBanner.innerHTML = `
+                    <h2>✅ Missie voltooid!</h2>
+                    <p>Bewijs is geüpload. Nieuwe missie wordt geladen...</p>
+                `;
+                stopMissionTimer();
 
-    // Foto-feed (algemeen)
-    onValue(photosRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) {
-        photoFeed.innerHTML = '<div style="color:#8899aa;">Geen foto’s.</div>';
-        return;
-      }
-      let html = '';
-      const keys = Object.keys(data).sort((a,b) => data[b].timestamp - data[a].timestamp);
-      for (const key of keys) {
-        const photo = data[key];
-        html += `
-          <div class="photo-item">
-            <img src="${photo.imageUrl}" alt="Foto" loading="lazy" />
-            <div class="meta">
-              <span class="uploader">${photo.uploader || 'Onbekend'}</span>
-              <span>${new Date(photo.timestamp).toLocaleString()}</span>
-              ${photo.type === 'proof' ? ' <span style="color:#f0c040;">📜 Bewijs</span>' : ''}
-            </div>
-          </div>
-        `;
-      }
-      photoFeed.innerHTML = html || '<div style="color:#8899aa;">Geen foto’s.</div>';
-    });
+                // Markeer als voltooid in Firebase
+                const playerSnap = await get(playerRef);
+                const player = playerSnap.val();
+                const completed = player.completedMissions || [];
+                if (!completed.includes(currentMissionId)) {
+                    completed.push(currentMissionId);
+                    await update(playerRef, {
+                        completedMissions: completed,
+                        currentMissionId: null
+                    });
+                }
 
-    // Upload algemene foto
-    async function uploadPhoto(file) {
-      if (!file) return;
-      setStatus(uploadStatus, '⏳ Uploaden...', 'info');
-      try {
-        const fileName = `${Date.now()}_${file.name}`;
-        const storageReference = storageRef(storage, `klassen/${className}/photos/${fileName}`);
-        await uploadBytes(storageReference, file);
-        const downloadURL = await getDownloadURL(storageReference);
-        await push(photosRef, {
-          uploader: teamName + ' (C)',
-          imageUrl: downloadURL,
-          timestamp: getTimestamp()
+                // Stuur chat dat missie voltooid is
+                const chatsRef = ref(db, `klassen/${className}/chats`);
+                await push(chatsRef, {
+                    sender: '✅ Missie',
+                    text: `📌 Missie ${currentMissionId} voltooid! Bewijs geüpload.`,
+                    timestamp: getTimestamp(),
+                    isSystem: true
+                });
+
+                // Na korte pauze, volgende missie
+                setTimeout(() => {
+                    missionCompleteBanner.classList.add('hidden');
+                    assignNextMission();
+                }, 2000);
+
+            } catch (err) {
+                setStatus(proofUploadStatus, '❌ Fout: ' + err.message, 'error');
+                uploadProofBtn.disabled = false;
+            }
+        }
+
+        // ============================================================
+        // AUTO ADVANCE (6 min)
+        // ============================================================
+        async function autoAdvanceMission() {
+            if (missionCompleted || !isMissionActive) return;
+            console.log('⏰ Auto-advance triggered for mission:', currentMissionId);
+
+            missionCompleted = true;
+            isMissionActive = false;
+            stopMissionTimer();
+
+            // Markeer als voltooid (ook al is er geen foto)
+            const playerSnap = await get(playerRef);
+            const player = playerSnap.val();
+            const completed = player.completedMissions || [];
+            if (!completed.includes(currentMissionId)) {
+                completed.push(currentMissionId);
+                await update(playerRef, {
+                    completedMissions: completed,
+                    currentMissionId: null
+                });
+            }
+
+            // Stuur chat dat de tijd om is
+            const chatsRef = ref(db, `klassen/${className}/chats`);
+            await push(chatsRef, {
+                sender: '⏰ Tijd',
+                text: `⏱️ 6 minuten verstreken voor missie ${currentMissionId}. Automatisch door naar de volgende.`,
+                timestamp: getTimestamp(),
+                isSystem: true
+            });
+
+            missionFull.classList.add('hidden');
+            missionCompleteBanner.classList.remove('hidden');
+            missionCompleteBanner.innerHTML = `
+                <h2>⏱️ Tijd verstreken</h2>
+                <p>Automatisch door naar de volgende missie...</p>
+            `;
+
+            setTimeout(() => {
+                missionCompleteBanner.classList.add('hidden');
+                assignNextMission();
+            }, 1500);
+        }
+
+        // ============================================================
+        // FOTO FEED (live)
+        // ============================================================
+        function initPhotoFeed() {
+            const photosRef = ref(db, `klassen/${className}/photos`);
+            onValue(photosRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    photoFeed.innerHTML = '<div style="color:#8899aa;">Geen foto’s.</div>';
+                    return;
+                }
+                let html = '';
+                const keys = Object.keys(data).sort((a, b) => data[b].timestamp - data[a].timestamp);
+                for (const key of keys) {
+                    const p = data[key];
+                    const isProof = p.type === 'proof';
+                    html += `
+                        <div class="photo-item">
+                            <img src="${p.imageUrl}" alt="Foto" loading="lazy" />
+                            <div class="meta">
+                                <span class="uploader">${p.uploader || 'Onbekend'}</span>
+                                <span>${new Date(p.timestamp).toLocaleString()}</span>
+                                ${isProof ? ' <span style="color:#f0c040;">📜 Bewijs</span>' : ''}
+                                ${p.missionId ? ` <span style="color:#8899aa;font-size:0.7rem;">${p.missionId}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                photoFeed.innerHTML = html || '<div style="color:#8899aa;">Geen foto’s.</div>';
+            });
+        }
+
+        // ============================================================
+        // CHAT
+        // ============================================================
+        function initChat() {
+            const chatsRef = ref(db, `klassen/${className}/chats`);
+            onValue(chatsRef, (snapshot) => {
+                const data = snapshot.val();
+                const chatDiv = document.getElementById('criminalChatMessages');
+                if (!data) {
+                    chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>';
+                    return;
+                }
+                let html = '';
+                const keys = Object.keys(data).sort((a, b) => data[a].timestamp - data[b].timestamp);
+                for (const key of keys) {
+                    const msg = data[key];
+                    const isSystem = msg.isSystem || false;
+                    const senderClass = isSystem ? 'color:#f0c040;' : '';
+                    html += `
+                        <div class="chat-message">
+                            <span class="sender" style="${senderClass}">${msg.sender || 'Onbekend'}:</span>
+                            <span>${msg.text}</span>
+                            <span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    `;
+                }
+                chatDiv.innerHTML = html || '<div style="color:#8899aa;">Geen berichten.</div>';
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            });
+
+            document.getElementById('criminalSendChatBtn').addEventListener('click', async () => {
+                const text = document.getElementById('criminalChatInput').value.trim();
+                if (!text) return;
+                await push(chatsRef, {
+                    sender: `${teamName} (C)`,
+                    text: text,
+                    timestamp: getTimestamp(),
+                    isSystem: false
+                });
+                document.getElementById('criminalChatInput').value = '';
+            });
+
+            // Enter key
+            document.getElementById('criminalChatInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('criminalSendChatBtn').click();
+                }
+            });
+        }
+
+        // ============================================================
+        // PINGS
+        // ============================================================
+        function sendPing() {
+            const lat = 52.13 + (Math.random() - 0.5) * 0.01;
+            const lng = 5.366 + (Math.random() - 0.5) * 0.01;
+            push(ref(db, `klassen/${className}/pings`), {
+                teamName: teamName,
+                latitude: lat,
+                longitude: lng,
+                timestamp: getTimestamp()
+            }).catch(err => console.warn('Ping mislukt:', err));
+        }
+
+        function schedulePing() {
+            if (pingTimer) clearTimeout(pingTimer);
+            const interval = Math.floor(Math.random() * (15 * 60 * 1000 - 2 * 60 * 1000) + 2 * 60 * 1000);
+            pingTimer = setTimeout(() => {
+                sendPing();
+                schedulePing();
+            }, interval);
+        }
+
+        // ============================================================
+        // ALGEMENE FOTO UPLOAD
+        // ============================================================
+        async function uploadPhoto(file) {
+            if (!file) return;
+            setStatus(uploadStatus, '⏳ Uploaden...', 'info');
+            try {
+                const fileName = `${Date.now()}_${file.name}`;
+                const storageReference = storageRef(storage, `klassen/${className}/photos/${fileName}`);
+                await uploadBytes(storageReference, file);
+                const downloadURL = await getDownloadURL(storageReference);
+                const photosRef = ref(db, `klassen/${className}/photos`);
+                await push(photosRef, {
+                    uploader: `${teamName} (C)`,
+                    imageUrl: downloadURL,
+                    timestamp: getTimestamp(),
+                    type: 'general'
+                });
+                setStatus(uploadStatus, '✅ Foto geüpload!', 'success');
+            } catch (err) {
+                setStatus(uploadStatus, '❌ Fout: ' + err.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // LOGIN / INIT
+        // ============================================================
+        loginBtn.addEventListener('click', async () => {
+            const name = usernameInput.value.trim();
+            className = classSelect.value;
+
+            if (!name) {
+                setStatus(loginStatus, 'Voer een teamnaam in.', 'error');
+                return;
+            }
+
+            setStatus(loginStatus, '🔄 Inloggen...', 'info');
+
+            try {
+                playerRef = ref(db, `klassen/${className}/players/${name}`);
+                const snapshot = await get(playerRef);
+                if (snapshot.exists()) {
+                    setStatus(loginStatus, '❌ Deze teamnaam is al in gebruik in deze klas.', 'error');
+                    return;
+                }
+
+                const playerData = {
+                    role: 'criminal',
+                    teamName: name,
+                    className: className,
+                    joinedAt: getTimestamp(),
+                    status: 'on_the_run',
+                    cluesFound: [],
+                    isArrested: false,
+                    extractReached: false,
+                    currentLocationId: null,
+                    completedLocations: [],
+                    hunterTimerEnd: null,
+                    locationStartTime: null,
+                    completedMissions: [],
+                    currentMissionId: null
+                };
+                await set(playerRef, playerData);
+
+                teamName = name;
+                setStatus(loginStatus, `✅ Ingelogd als crimineel in klas ${className}`, 'success');
+                showScreen('criminalScreen');
+                initCriminalDashboard(teamName, className);
+            } catch (err) {
+                setStatus(loginStatus, '❌ Fout: ' + err.message, 'error');
+            }
         });
-        setStatus(uploadStatus, '✅ Foto geüpload!', 'success');
-      } catch (err) {
-        setStatus(uploadStatus, '❌ Fout: ' + err.message, 'error');
-      }
-    }
 
-    uploadPhotoBtn.addEventListener('click', () => {
-      photoInput.click();
-    });
+        // ============================================================
+        // CRIMINEEL DASHBOARD
+        // ============================================================
+        function initCriminalDashboard(teamName, className) {
+            // Timer update
+            updateGlobalTimer();
+            setInterval(() => updateGlobalTimer(), 1000);
 
-    photoInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        uploadPhoto(file);
-      }
-      photoInput.value = '';
-    });
+            document.getElementById('criminalTeamName').textContent = `${teamName} (${className})`;
 
-    document.getElementById('criminalLogoutBtn').addEventListener('click', () => {
-      if (confirm('Weet je zeker dat je wilt uitloggen?')) {
-        logout();
-      }
-    });
-  }
+            gameStatusRef = ref(db, `klassen/${className}/game/status`);
+            missionsRef = ref(db, `klassen/${className}/missions`);
 
-  // Init
-  showScreen('loginScreen');
-  setStatus(loginStatus, 'Kies je klas, voer je teamnaam in en log in.', 'info');
-</script>
+            // Zet missievolgorde klaar
+            missionOrder = buildMissionOrder();
+            console.log('📋 Missie volgorde:', missionOrder);
+            document.getElementById('missionCounter').innerHTML =
+                `Missie <strong id="currentMissionNum">0</strong> van <strong>${missionOrder.length}</strong>`;
+
+            // Initialiseer kaart
+            initMap();
+
+            // Wacht op game status
+            onValue(gameStatusRef, async (snapshot) => {
+                const status = snapshot.val();
+                if (status === 'running') {
+                    gameStarted = true;
+                    waitingMessage.classList.add('hidden');
+                    // Check of speler al een missie heeft
+                    const playerSnap = await get(playerRef);
+                    const player = playerSnap.val();
+                    if (player && player.currentMissionId) {
+                        await loadMission(player.currentMissionId);
+                    } else if (player && !player.currentMissionId && !isGameComplete) {
+                        await assignNextMission();
+                    }
+                    schedulePing();
+                } else {
+                    gameStarted = false;
+                    waitingMessage.classList.remove('hidden');
+                    if (pingTimer) { clearTimeout(pingTimer);
+                        pingTimer = null; }
+                }
+            });
+
+            // Luister naar missie veranderingen
+            onValue(playerRef, async (snapshot) => {
+                const player = snapshot.val();
+                if (!player) return;
+                if (player.currentMissionId && player.currentMissionId !== currentMissionId && !missionCompleted) {
+                    await loadMission(player.currentMissionId);
+                }
+                if (player.status === 'escaped') {
+                    isGameComplete = true;
+                    document.getElementById('criminalStatusBadge').textContent = '✅ Ontsnapt';
+                    document.getElementById('criminalStatusBadge').className = 'badge badge-success';
+                }
+            });
+
+            // Init foto feed
+            initPhotoFeed();
+
+            // Init chat
+            initChat();
+
+            // Upload bewijs
+            uploadProofBtn.addEventListener('click', () => {
+                if (!missionUnlocked) {
+                    setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning');
+                    return;
+                }
+                if (missionCompleted) {
+                    setStatus(proofUploadStatus, '⚠️ Deze missie is al voltooid.', 'warning');
+                    return;
+                }
+                proofPhotoInput.click();
+            });
+
+            proofPhotoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadProofPhoto(file);
+                }
+                proofPhotoInput.value = '';
+            });
+
+            // Algemene foto
+            uploadPhotoBtn.addEventListener('click', () => {
+                photoInput.click();
+            });
+
+            photoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadPhoto(file);
+                }
+                photoInput.value = '';
+            });
+
+            // Uitloggen
+            document.getElementById('criminalLogoutBtn').addEventListener('click', () => {
+                if (confirm('Weet je zeker dat je wilt uitloggen?')) {
+                    logout();
+                }
+            });
+        }
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        function logout() {
+            if (pingTimer) { clearTimeout(pingTimer);
+                pingTimer = null; }
+            if (watchPositionId) { navigator.geolocation.clearWatch(watchPositionId);
+                watchPositionId = null; }
+            stopMissionTimer();
+            showScreen('loginScreen');
+            setStatus(loginStatus, 'Uitgelogd.', 'info');
+            // Reset state
+            isGameComplete = false;
+            missionCompleted = false;
+            isMissionActive = false;
+            currentMissionId = null;
+            currentMissionData = null;
+            missionUnlocked = false;
+            missionOrder = [];
+            missionIndex = 0;
+        }
+
+        // ============================================================
+        // START
+        // ============================================================
+        showScreen('loginScreen');
+        setStatus(loginStatus, 'Kies je klas, voer je teamnaam in en log in.', 'info');
+    </script>
 </body>
 </html>
