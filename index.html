@@ -8,343 +8,71 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
     </script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e17;
-            color: #e0e0e0;
-            padding: 16px;
-            max-width: 800px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .card {
-            background: #1a2332;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 1px solid #2a3a4a;
-        }
-        h1 {
-            font-size: 1.8rem;
-            color: #f0c040;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        h1 small {
-            font-size: 1rem;
-            color: #8899aa;
-            font-weight: normal;
-        }
-        h2 {
-            font-size: 1.3rem;
-            color: #88ccff;
-            margin-bottom: 12px;
-        }
-        .form-group {
-            margin-bottom: 14px;
-        }
-        label {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 4px;
-            color: #aabbcc;
-        }
-        input,
-        select {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 8px;
-            border: 1px solid #2a3a4a;
-            background: #0d1624;
-            color: #e0e0e0;
-            font-size: 1rem;
-        }
-        input:focus {
-            border-color: #4a90d9;
-            outline: none;
-        }
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .btn:active {
-            transform: scale(0.96);
-        }
-        .btn-primary {
-            background: #4a90d9;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #357abd;
-        }
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #218838;
-        }
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        .btn-warning {
-            background: #f0c040;
-            color: #1a2332;
-        }
-        .btn-warning:hover {
-            background: #d4a830;
-        }
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 6px;
-        }
-        .btn-group .btn {
-            flex: 1;
-        }
-        .hidden {
-            display: none !important;
-        }
-        #status {
-            margin-top: 12px;
-            padding: 10px;
-            border-radius: 8px;
-            background: #0d1624;
-            color: #8899aa;
-            font-size: 0.95rem;
-        }
-        #status.error {
-            background: #3d1a1a;
-            color: #ff6b6b;
-        }
-        #status.success {
-            background: #1a3d1a;
-            color: #6bff6b;
-        }
-        #status.warning {
-            background: #3d3a1a;
-            color: #ffd76b;
-        }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid #1a2a3a;
-            flex-wrap: wrap;
-        }
-        .info-row .label {
-            color: #8899aa;
-        }
-        .info-row .value {
-            color: #e0e0e0;
-            font-weight: 600;
-        }
-        .chat-messages {
-            max-height: 200px;
-            overflow-y: auto;
-            background: #0d1624;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
-        }
-        .chat-message {
-            padding: 4px 0;
-            border-bottom: 1px solid #1a2a3a;
-            font-size: 0.9rem;
-        }
-        .chat-message .sender {
-            color: #88ccff;
-            font-weight: 600;
-        }
-        .chat-message .time {
-            color: #667788;
-            font-size: 0.7rem;
-        }
-        .badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .badge-criminal {
-            background: #dc3545;
-            color: white;
-        }
-        .badge-success {
-            background: #28a745;
-            color: white;
-        }
-        @media (max-width: 480px) {
-            .btn-group .btn {
-                flex: 1 1 100%;
-            }
-        }
-        .photo-feed {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .photo-item {
-            background: #0d1624;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #2a3a4a;
-        }
-        .photo-item img {
-            width: 100%;
-            display: block;
-        }
-        .photo-item .meta {
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: #8899aa;
-        }
-        .photo-item .meta .uploader {
-            color: #88ccff;
-            font-weight: 600;
-        }
-        .photo-upload-area {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-        .photo-upload-area input[type="file"] {
-            display: none;
-        }
-        .waiting-message {
-            background: #0d1624;
-            border-radius: 8px;
-            padding: 12px;
-            border-left: 4px solid #f0c040;
-            color: #f0c040;
-            text-align: center;
-            font-weight: 600;
-        }
-        .mission-box {
-            background: #0d1624;
-            border-radius: 8px;
-            padding: 12px;
-            border-left: 4px solid #8b5cf6;
-            color: #d4c0f0;
-            font-style: italic;
-            line-height: 1.6;
-        }
-        .mission-details {
-            background: #0d1624;
-            border-radius: 8px;
-            padding: 12px;
-            border-left: 4px solid #f0c040;
-            margin-top: 8px;
-            color: #e0e0e0;
-        }
-        .mission-details strong {
-            color: #f0c040;
-        }
-        #criminalMap {
-            height: 400px;
-            width: 100%;
-            border-radius: 8px;
-            background: #0d1624;
-            margin-top: 8px;
-        }
-        .timer-warning {
-            color: #ff6b6b;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.4;
-            }
-        }
-        .mission-counter {
-            background: #0d1624;
-            border-radius: 8px;
-            padding: 8px 12px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #8899aa;
-            margin-top: 6px;
-        }
-        .mission-counter strong {
-            color: #f0c040;
-        }
-        .spoor-box {
-            background: #1a1a2e;
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-top: 8px;
-            border-left: 3px solid #f0c040;
-            font-size: 0.9rem;
-            color: #c8b8e0;
-            white-space: pre-wrap;
-        }
-        .spoor-box strong {
-            color: #f0c040;
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .complete-banner {
-            background: #1a3d1a;
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-            border: 1px solid #28a745;
-        }
-        .complete-banner h2 {
-            color: #6bff6b;
-            margin-bottom: 4px;
-        }
-        .note-area {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #2a3a4a;
-        }
-        .note-area .btn {
-            margin-top: 6px;
-        }
-        .godfather-card .chat-messages {
-            max-height: 150px;
-        }
-        #mapContainer {
-            margin-top: 12px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0e17; color: #e0e0e0; padding: 16px; max-width: 800px; margin: 0 auto; min-height: 100vh; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #1a2332; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 1px solid #2a3a4a; }
+        h1 { font-size: 1.8rem; color: #f0c040; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        h1 small { font-size: 1rem; color: #8899aa; font-weight: normal; }
+        h2 { font-size: 1.3rem; color: #88ccff; margin-bottom: 12px; }
+        .form-group { margin-bottom: 14px; }
+        label { font-weight: 600; display: block; margin-bottom: 4px; color: #aabbcc; }
+        input, select { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #2a3a4a; background: #0d1624; color: #e0e0e0; font-size: 1rem; }
+        input:focus { border-color: #4a90d9; outline: none; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: #4a90d9; color: white; }
+        .btn-primary:hover { background: #357abd; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-warning { background: #f0c040; color: #1a2332; }
+        .btn-warning:hover { background: #d4a830; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .btn-group .btn { flex: 1; }
+        .hidden { display: none !important; }
+        #status { margin-top: 12px; padding: 10px; border-radius: 8px; background: #0d1624; color: #8899aa; font-size: 0.95rem; }
+        #status.error { background: #3d1a1a; color: #ff6b6b; }
+        #status.success { background: #1a3d1a; color: #6bff6b; }
+        #status.warning { background: #3d3a1a; color: #ffd76b; }
+        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1a2a3a; flex-wrap: wrap; }
+        .info-row .label { color: #8899aa; }
+        .info-row .value { color: #e0e0e0; font-weight: 600; }
+        .chat-messages { max-height: 200px; overflow-y: auto; background: #0d1624; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+        .chat-message { padding: 4px 0; border-bottom: 1px solid #1a2a3a; font-size: 0.9rem; }
+        .chat-message .sender { color: #88ccff; font-weight: 600; }
+        .chat-message .time { color: #667788; font-size: 0.7rem; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .badge-criminal { background: #dc3545; color: white; }
+        .badge-success { background: #28a745; color: white; }
+        @media (max-width: 480px) { .btn-group .btn { flex: 1 1 100%; } }
+        .photo-feed { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+        .photo-item { background: #0d1624; border-radius: 8px; overflow: hidden; border: 1px solid #2a3a4a; }
+        .photo-item img { width: 100%; display: block; }
+        .photo-item .meta { padding: 8px 12px; display: flex; justify-content: space-between; font-size: 0.85rem; color: #8899aa; }
+        .photo-item .meta .uploader { color: #88ccff; font-weight: 600; }
+        .photo-upload-area { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .photo-upload-area input[type="file"] { display: none; }
+        .waiting-message { background: #0d1624; border-radius: 8px; padding: 12px; border-left: 4px solid #f0c040; color: #f0c040; text-align: center; font-weight: 600; }
+        .mission-box { background: #0d1624; border-radius: 8px; padding: 12px; border-left: 4px solid #8b5cf6; color: #d4c0f0; font-style: italic; line-height: 1.6; }
+        .mission-details { background: #0d1624; border-radius: 8px; padding: 12px; border-left: 4px solid #f0c040; margin-top: 8px; color: #e0e0e0; }
+        .mission-details strong { color: #f0c040; }
+        #criminalMap { height: 400px; width: 100%; border-radius: 8px; background: #0d1624; margin-top: 8px; }
+        .timer-warning { color: #ff6b6b; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .mission-counter { background: #0d1624; border-radius: 8px; padding: 8px 12px; text-align: center; font-size: 0.9rem; color: #8899aa; margin-top: 6px; }
+        .mission-counter strong { color: #f0c040; }
+        .spoor-box { background: #1a1a2e; border-radius: 8px; padding: 10px 14px; margin-top: 8px; border-left: 3px solid #f0c040; font-size: 0.9rem; color: #c8b8e0; white-space: pre-wrap; }
+        .spoor-box strong { color: #f0c040; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .complete-banner { background: #1a3d1a; border-radius: 8px; padding: 16px; text-align: center; border: 1px solid #28a745; }
+        .complete-banner h2 { color: #6bff6b; margin-bottom: 4px; }
+        .note-area { margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a3a4a; }
+        .note-area .btn { margin-top: 6px; }
+        .godfather-card .chat-messages { max-height: 150px; }
+        #mapContainer { margin-top: 12px; }
+        .photo-hint { font-size: 0.85rem; color: #aabbcc; margin-top: 4px; font-style: italic; border-left: 3px solid #f0c040; padding-left: 8px; }
     </style>
 </head>
 <body>
@@ -425,15 +153,16 @@
                     <div class="note-area" id="noteArea">
                         <label for="missionNoteInput">📝 Antwoord/Notitie voor de opdracht:</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <input type="text" id="missionNoteInput" placeholder="Bijv. signalement, bevindingen..." style="flex:1;" />
-                            <button class="btn btn-warning" id="sendNoteBtn">📨 Verstuur notitie</button>
+                            <input type="text" id="missionNoteInput" placeholder="" style="flex:1;" />
+                            <button class="btn btn-warning" id="sendNoteBtn">📨 Verstuur notitie & voltooi</button>
                             <span id="noteStatus" style="font-size:0.8rem;color:#8899aa;align-self:center;"></span>
                         </div>
                     </div>
 
                     <div class="photo-upload-area" style="margin-top:8px;">
+                        <div class="photo-hint" id="photoHint"></div>
                         <input type="file" id="proofPhotoInput" accept="image/*" capture="environment" />
-                        <button class="btn btn-success" id="uploadProofBtn">📷 Upload bewijs</button>
+                        <button class="btn btn-success" id="uploadProofBtn">📷 Upload bewijs (voltooi)</button>
                         <span id="proofUploadStatus" style="font-size:0.8rem;color:#8899aa;align-self:center;"></span>
                     </div>
                     <div style="margin-top:8px;font-size:0.8rem;color:#667788;" id="autoAdvanceNotice">
@@ -492,12 +221,8 @@
             push,
             set,
             onValue,
-            remove,
             get,
             update,
-            query,
-            orderByChild,
-            limitToLast
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
         import {
             getStorage,
@@ -531,73 +256,24 @@
         const MISSION_TIMEOUT = 360; // 6 minuten per missie
 
         // ============================================================
-        // MISSIE DATA
+        // MISSIE DATA (alle 14 missies)
         // ============================================================
-        const MISSION_DATA = [{
-            "id": "mission1",
-            "order": 1,
-            "lat": 52.131168,
-            "lng": 5.365757,
-            "cryptic": "We krijgen zojuist een melding binnen van een verdachte situatie op de aangewezen locatie. Er zijn sterke aanwijzingen dat een criminele groepering ter plaatse is om een zojuist ingesloten handlanger op te pikken en te ontzetten. Meld OC signalement van deze persoon. Bevraag de getuigen naar signalementen en gestolen goederen. Noteer jullie bevindingen.",
-            "description": "Pik hier jullie handlanger op en neem het goud mee. Ik wil er zeker van zijn dat jullie alles hebben. Maak een foto van jullie team, met handlanger en het goud.",
-            "spoor": "Poster met mugshot : lowiekevanrubber.png\nSignalemen:\n-uiterlijk: Grijs, rubberen postuur, zeer fors gebouwd;\n- haardracht: opvallende, weelderige zwarte haardos met een dikke, donkere snor; \nkleding: voornamelijke grijze kleding; \n- accessoires: behangen met extreem veel 'blingbling'. Draagt meerdere gouden kettingen (waarvan één met handboeien-hanger), een opvallend gouden horloge om de linkerpols, gouden armbanden om de rechterpols en diverse glimmende ringen om de vingers.\nKettlebell wordt meegenomen"
-        }, {
-            "id": "mission2",
-            "order": 2,
-            "lat": 52.131752708465726,
-            "lng": 5.368489613802097,
-            "cryptic": "Alle eenheden regio Amersfoort/Leusden, aanvulling op de lopende drugsgerelateerde melding op het Sintelplein 2.\n\nSituatie: Omstanders melden zojuist een verdacht voertuig dat met draaiende motor stand-by staat in de directe omgeving van de doellocatie. Het vermoeden bestaat dat dit het vluchtvoertuig is voor de lopende transactie binnen.\n\nVoertuig & Signalement: Het betreft een snelle, sportieve matzwarte sedan (mogelijk BMW of Audi). Bij het voertuig staat een robuuste man die zich zenuwachtig ophoudt. Signalement: zwarte muts, legergroene jas en opvallend veel zware gouden kettingen en ringen.\n\nInstructie: Toon spoed. Eenheden dienen de mogelijke vluchtwegen rondom het Sintelplein direct dicht te zetten en het voertuig tactisch te benaderen. Houd rekening met een directe en agressieve vluchtpoging. Verdachten zijn vermoedelijk vuurwapengevaarlijk. Bevestig positie bij aankomst. Meld status van het voertuig uit RDW-gegevens.",
-            "description": "Luister goed. De deal op het Sintelplein in Leusden is bijna rond, maar we hebben een waterdicht plan nodig om daarna te verdwijnen. Zoek nu meteen een geschikt vluchtvoertuig uit—iets snels, betrouwbaars en krachtig genoeg om weg te komen als de grond te heet onder de voeten wordt.\n\nZorg dat de wagen klaarstaat en maak een foto van onze handlanger samen met het voertuig, zodat ik zeker weet dat alles volgens mijn instructies geregeld is. Geen excuses, geen fouten, anders zijn de consequenties voor jullie. Begrepen?",
-            "spoor": "Kentekenplaat op auto\nIn code hunters RDW check met voertuig genoteerd als gestolen"
-        }, {
-            "id": "mission3",
-            "order": 3,
-            "lat": 52.130733811829295,
-            "lng": 5.364181348595629,
-            "cryptic": "PRIO 1. Verzoek om assistentie. Melding van een vuurgevecht gaande op de [Locatie in Ede, bijv. Parkeerterrein Kernhem]. Meerdere verdachten, vuurwapengevaarlijk. Eenheden ter plaatse melden recent schotwisseling. Minimaal twee verdachten betrokken, een oudere man en een jongere man. Beiden dragen zwarte kleding. Een van de verdachten, een jonge man met een capuchon en sjaal, lijkt momenteel onbekwaam met zijn eigen vuurwapen en worstelt ermee. Benader met extreme voorzichtigheid. Eenheden met ballistische bescherming gewenst. Beschrijf de situatie aan de hand van de camerabeelden.",
-            "description": "Heren, de situatie op deze locatie vereist een directe aanpak; de tegenpartij weigert zich aan onze afspraken te houden. Jullie gaan daar nu naartoe in zwarte kleding om de boel recht te zetten en onze belangen te beschermen. Mocht er weerstand zijn, dan lossen jullie dat ter plekke en definitief op. En jij, jongeman—zorg dat je je wapen dit keer onder controle hebt en niet aarzelt als de eerste kogel moet vallen. Stel me niet teleur.",
-            "spoor": "afbeeldingen camerabeelden: \nincidentwapenkamer.png\nincidentwapenkamerhulzen.png"
-        }, {
-            "id": "mission4",
-            "order": 4,
-            "lat": 52.13080791024424,
-            "lng": 5.365163684943295,
-            "cryptic": "Aan alle beschikbare eenheden regio Ede. Prioriteit 1. Dringend verzoek om assistentie bij een ernstig verkeersongeval op de Loes van Overeemlaan, nabij bushalte Schietbaan, Leusden. \n\nSituatie: Een zwart voertuig is na extreem gevaarlijk rijgedrag met hoge snelheid frontaal in botsing gekomen met een Connexxion lijnbus (Lijn 88 richting Ede Station). Er is sprake van zware materiële schade aan zowel de bus als de personenauto. Mogelijk letsel bij de passagiers in de bus.\n\nBijzonderheden: Het zwarte voertuig matcht met de eerdere meldingen over het gevaarlijke vluchtgedrag. Meerdere getuigen ter plaatse melden dat de inzittenden van het voertuig op dit moment in alle haast tassen en goederen uit de auto aan het trekken zijn. Ze proberen de locatie te voet te ontvluchten nog vóór de aankomst van de eerste eenheden.\n\nInstructie: Met spoed aanrijden. Eenheden in de omgeving dienen direct de omliggende straten en vluchtwegen af te grendelen om de verdachten te onderscheppen. Ambulance en brandweer zijn met prioriteit onderweg voor de hulpverlening in de bus. Benader de verdachten met verhoogde waakzaamheid. Geef door waarheen de betrokkenen zijn gevlucht. Geef door hoe de betrokkenen zijn gevlucht.",
-            "description": "Luister goed. Er is een pakketje dat absoluut niet in de verkeerde handen mag vallen. De koerier heeft specifieke instructies gekregen: deze levering heeft prioriteit boven alles. Als er obstakels zijn, dan worden die omzeild. Als er vertraging dreigt, dan wordt er gas bijgegeven. Geen excuses, geen maren. Het belang van de familie staat op het spel. Zorg dat het aankomt, hoe dan ook..... Een ongeluk? Dit is exact het soort amateurisme waar ik een broertje dood aan heb. Ik vroeg om een snelle levering, niet om een mediaspektakel dat de hele politiemacht van de regio Amersfoort op onze nek haalt.\nAls dat pakketje nu door de recherche wordt gevonden, hebben die twee een veel groter probleem dan een paar gekneusde ribben. Zorg dat onze mensen ter plaatse zijn nog vóór de bergingsauto arriveert. De sporen moeten worden uitgewist, de auto moet leeg, en die twee malloten moeten verdwijnen uit het zicht van de autoriteiten. Incompetentie die de familie in gevaar brengt, tolereer ik niet. Regel het. Nu.",
-            "spoor": "Afbeelding ongeluk connexxionbus: verkeersongeluk.png"
-        }, {
-            "id": "mission5",
-            "order": 5,
-            "lat": 52.131571583234894,
-            "lng": 5.369203091268884,
-            "cryptic": "Aan alle beschikbare eenheden regio Leusden Prioriteit 1. Verzoek om onderzoek naar een verdachte situatie in een woning. Exacte adresgegevens volgen via de MDT.\n\nSituatie: Via een betrouwbare bron is informatie binnengekomen dat er op dit moment een illegale overdracht plaatsvindt in de woning. Er zou een ontmoeting gaande zijn tussen een bewoner/contactpersoon en externe partijen.\n\nBijzonderheden: De transactie betreft vermoedelijk de uitwisseling van gevoelige documenten tegen een substantiële hoeveelheid verdovende middelen (harddrugs, omschreven als 'poeder'), welke verpakt zouden zitten in een doos. Er is een reële kans dat de betrokkenen proberen de locatie snel te verlaten zodra de overdracht is afgerond.\n\nInstructie: Benader de woning onopvallend en tactisch. Stel eventuele vluchtwegen aan de achterzijde van het pand veilig alvorens aan te bellen. Houd rekening met de aanwezigheid van meerdere personen binnen. Beschrijf wat je binnen aantreft.",
-            "description": "Luister goed naar wat ik je nu ga zeggen. Op de afgesproken locatie staat een huis waar de documenten die we nodig hebben op je liggen te wachten. Dit zijn niet zomaar papieren; dit zijn de geheimen die onze positie veiligstellen.\n\nEr is binnen een contactpersoon aanwezig die precies weet waarom je komt. Je overhandigt de documenten, en in ruil daarvoor neem je onze specifieke hoeveelheid poeder mee... je weet precies wat ik bedoel, exact volgens de afspraak die we vooraf gemaakt hebben. Het staat klaar in de doos.\n\nGeen misverstanden, geen onnodige vragen. Je loopt naar binnen, handelt dit zakelijk af en zorgt dat alles geruisloos verloopt. Laat me zien dat ik op je kan rekenen. Succes.",
-            "spoor": "Lijk TLO\nDoos\nDrugs"
-        }, {
-            "id": "mission6",
-            "order": 6,
-            "lat": 52.1305771043951,
-            "lng": 5.3671699778875945,
-            "cryptic": "Aan alle beschikbare eenheden regio Ede. Prioriteit 2. Verzoek om controle bij een leegstaande loods. Exacte locatiegegevens volgen via de MDT.\n\nSituatie: Er is zojuist een melding binnengekomen over verdachte activiteit rondom een verlaten loods. Een passant zag een persoon zich verdacht ophouden aan de achterzijde van het pand en vervolgens een oude kelderruimte betreden.\n\nBijzonderheden: Vermoeden bestaat dat deze locatie wordt gebruikt voor het stallen of verbergen van illegale goederen of bewijsmateriaal (mogelijk documenten of administratie gerelateerd aan eerdere incidenten). Er is vooralsnog geen sprake van directe dreiging of wapens, maar alertheid is geboden.\n\nInstructie: Rijdt aan zonder optische en geluidssignalen om de verdachte niet op te schrikken. Benader de achterzijde en de kelderruimte van de loods tactisch. Controleer de ruimte op eventueel achtergelaten goederen of nog aanwezige personen. Stel sporen veilig. Beschrijf wat je aantreft.",
-            "description": "Luister goed. Het goud dat je zojuist hebt veiliggesteld is op dit moment ook levensgevaarlijk. De politie spit het hele Sintelplein binnenstebuiten en we kunnen geen enkel risico nemen.\n\nJe brengt het naar de oude kelderruimte achter de loods. Achter de derde steunpilaar zit een losse baksteen in de muur. Daar schuif je ze achter. Niemand komt daar, niemand zoekt daar. Als die papieren daar liggen, is het alsof ze nooit hebben bestaan.\n\nEn onthoud één ding: vanaf dit moment weet jij van niets, heb je niets gezien en ken je de naam van de contactpersoon niet meer. Als er ook maar één detail uitlekt naar de autoriteiten, dan weet je dat de familie dat niet ongestraft laat. Zorg dat het geregeld wordt, met de nodige discretie.",
-            "spoor": "Stapel stenen"
-        }, {
-            "id": "mission7",
-            "order": 7,
-            "lat": 52.1326780223426,
-            "lng": 5.368076571798458,
-            "cryptic": "Aan alle beschikbare eenheden regio Leusden Prioriteit 2. Verzoek om verhoogde surveillance en waakzaamheid rondom het bedrijfspand. Exacte objectgegevens volgen direct via de MDT.\n\nSituatie: Er is zojuist via een interne veiligheidslijn een melding binnengekomen over een verdachte ontmoeting nabij de personeelsingang van het object. Een onbekende man heeft daar contact gezocht met een van de aanwezige beveiligers.\n\nBijzonderheden: Het sterke vermoeden bestaat dat er sprake is van een poging tot omkoping of intimidatie van het beveiligingspersoneel ('platleggen' van de beveiliging) met het oog op een geplande inbraak of insluiping tijdens de avonduren. De beveiliger in kwestie wordt momenteel intern gehoord. Er is mogelijk een foto van de ontmoeting gemaakt door een handlanger in de buurt.\n\nInstructie: Neem het object en de directe omgeving op in de lopende surveillance voor de avond- en nachtdienst. Let specifiek op personen die zich ophouden rondom de camera-opstellingen of nooduitgangen. Meld eventuele verdachte voertuigen direct aan de meldkamer. Geef signalement van verdachte personen.",
-            "description": "Luister goed. Vanavond is de avond dat we het pand aan de binnenkant gaan bekijken, maar ik wil geen alarmbellen, geen honden en absoluut geen politie aan de deur. De beveiliging moet plat liggen nog vóór de zon ondergaat.\n\nEr loopt daar een bewaker rond die vatbaar is voor de juiste motivatie. Je zoekt hem op, je neemt hem apart en je zorgt ervoor dat hij inziet dat een goedgevulde envelop beter is voor zijn gezondheid en zijn portemonnee dan de held uithangen. Vertel hem precies hoe laat hij zijn ronde de andere kant op moet lopen en welke camera's er toevallig een uurtje 'storing' moeten hebben.\n\nEn ik wil bewijs dat de afspraak staat. Maak onopvallend een foto van de ontmoeting, zodat ik kan zien dat de deal gesloten is. Als die lichten vanavond uitgaan, slaan we onze slag. Zorg dat hij meewerkt—of zorg dat hij spijt krijgt dat hij ooit 'nee' heeft gezegd. Regel het.",
-            "spoor": "Geld voor corruptie\nEnvelop voor criminelen met Geheime documenten 'classified.pdf'"
-        }, {
-            "id": "mission8",
-            "order": 8,
-            "lat": 52.131564996774756,
-            "lng": 5.36609709267856,
-            "cryptic": "Aan alle eenheden regio en grensbewaking. Prioriteit 1. Verzoek om scherpe controle en uitkijken naar een verdachte die tracht het land te ontvluchten middels identiteitsfraude.\n\nSituatie: Uit tactische informatie is gebleken dat het subject, bekend onder de alias 'Lowieke van Rubber', actief bezig is met het aannemen van een valse identiteit. Er zijn aanwijzingen dat er vervalste reisbescheiden en pasfoto's zijn klaargemaakt voor internationale vluchten, met als vermoedelijke bestemmingen Tokyo of Rio de Janeiro.\n\nBijzonderheden: De verdachte maakt gebruik van hoogwaardig vervalste documenten en zal proberen de grenscontrole te passeren onder een gefingeerde naam. Het subject staat gesignaleerd.\n\nInstructie: Directe afstemming met de Koninklijke Marechaussee op de uitvalswegen en luchthavens. Bij aantreffen van personen die voldoen aan het signalement van de eerdere mugshots, direct overgaan tot staandehouding en verificatie van de biometrische gegevens. Benadering met verhoogde waakzaamheid. Maak een lijst op van reisplannen en bestemmingen.",
-            "description": "Luister goed naar me. De grond onder onze voeten wordt te heet. De recherche spit elk dossier door en die OC-meldingen bewijzen dat ze ons op het spoor zijn. Het is tijd voor het noodplan. Tokyo en Rio de Janeiro liggen klaar, maar je gaat niet als jezelf de grens over.\n\nLowieke van Rubber bestaat vanaf vandaag niet meer voor de douane. Je pakt die valse pasfoto's en de klaargemaakte reisbescheiden die we hebben gefabriceerd. Vanaf dit moment neem je de identiteit aan van de persoon op die papieren. Je leert zijn naam, zijn geboortedatum en zijn achtergrond uit je hoofd. Geen aarzeling bij de grenscontrole, geen zenuwachtig gedrag.\n\nAls ze je paspoort scannen, ben jij die ander. Je stapt dat vliegtuig in, laat je oude leven hier achter en zorgt dat je aan de andere kant van de wereld onder de radar verdwijnt. Identiteitsfraude is onze enige ticket naar vrijheid. Verpruts het niet, want een tweede kans krijg je niet van me. Verdwijn.",
-            "spoor": "reisbescheiden japan, Brazillië , alles\ndoos met reispapieren in Souterrain"
-        }];
+        const MISSION_DATA = [
+            { "id": "mission1", "order": 1, "lat": 52.131168, "lng": 5.365757, "cryptic": "We krijgen zojuist een melding binnen van een verdachte situatie op de aangewezen locatie. Er zijn sterke aanwijzingen dat een criminele groepering ter plaatse is om een zojuist ingesloten handlanger op te pikken en te ontzetten. Meld OC signalement van deze persoon. Bevraag de getuigen naar signalementen en gestolen goederen. Noteer jullie bevindingen.", "description": "Pik hier jullie handlanger op en neem het goud mee. Ik wil er zeker van zijn dat jullie alles hebben. Maak een foto van jullie team, met handlanger en het goud.", "spoor": "Poster met mugshot : lowiekevanrubber.png\nSignalemen:\n-uiterlijk: Grijs, rubberen postuur, zeer fors gebouwd;\n- haardracht: opvallende, weelderige zwarte haardos met een dikke, donkere snor; \nkleding: voornamelijke grijze kleding; \n- accessoires: behangen met extreem veel 'blingbling'. Draagt meerdere gouden kettingen (waarvan één met handboeien-hanger), een opvallend gouden horloge om de linkerpols, gouden armbanden om de rechterpols en diverse glimmende ringen om de vingers.\nKettlebell wordt meegenomen" },
+            { "id": "mission2", "order": 2, "lat": 52.131752708465726, "lng": 5.368489613802097, "cryptic": "Alle eenheden regio Amersfoort/Leusden, aanvulling op de lopende drugsgerelateerde melding op het Sintelplein 2.\n\nSituatie: Omstanders melden zojuist een verdacht voertuig dat met draaiende motor stand-by staat in de directe omgeving van de doellocatie. Het vermoeden bestaat dat dit het vluchtvoertuig is voor de lopende transactie binnen.\n\nVoertuig & Signalement: Het betreft een snelle, sportieve matzwarte sedan (mogelijk BMW of Audi). Bij het voertuig staat een robuuste man die zich zenuwachtig ophoudt. Signalement: zwarte muts, legergroene jas en opvallend veel zware gouden kettingen en ringen.\n\nInstructie: Toon spoed. Eenheden dienen de mogelijke vluchtwegen rondom het Sintelplein direct dicht te zetten en het voertuig tactisch te benaderen. Houd rekening met een directe en agressieve vluchtpoging. Verdachten zijn vermoedelijk vuurwapengevaarlijk. Bevestig positie bij aankomst. Meld status van het voertuig uit RDW-gegevens.", "description": "Luister goed. De deal op het Sintelplein in Leusden is bijna rond, maar we hebben een waterdicht plan nodig om daarna te verdwijnen. Zoek nu meteen een geschikt vluchtvoertuig uit—iets snels, betrouwbaars en krachtig genoeg om weg te komen als de grond te heet onder de voeten wordt.\n\nZorg dat de wagen klaarstaat en maak een foto van onze handlanger samen met het voertuig, zodat ik zeker weet dat alles volgens mijn instructies geregeld is. Geen excuses, geen fouten, anders zijn de consequenties voor jullie. Begrepen?", "spoor": "Kentekenplaat op auto\nIn code hunters RDW check met voertuig genoteerd als gestolen" },
+            { "id": "mission3", "order": 3, "lat": 52.130733811829295, "lng": 5.364181348595629, "cryptic": "PRIO 1. Verzoek om assistentie. Melding van een vuurgevecht gaande op de [Locatie in Ede, bijv. Parkeerterrein Kernhem]. Meerdere verdachten, vuurwapengevaarlijk. Eenheden ter plaatse melden recent schotwisseling. Minimaal twee verdachten betrokken, een oudere man en een jongere man. Beiden dragen zwarte kleding. Een van de verdachten, een jonge man met een capuchon en sjaal, lijkt momenteel onbekwaam met zijn eigen vuurwapen en worstelt ermee. Benader met extreme voorzichtigheid. Eenheden met ballistische bescherming gewenst. Beschrijf de situatie aan de hand van de camerabeelden.", "description": "Heren, de situatie op deze locatie vereist een directe aanpak; de tegenpartij weigert zich aan onze afspraken te houden. Jullie gaan daar nu naartoe in zwarte kleding om de boel recht te zetten en onze belangen te beschermen. Mocht er weerstand zijn, dan lossen jullie dat ter plekke en definitief op. En jij, jongeman—zorg dat je je wapen dit keer onder controle hebt en niet aarzelt als de eerste kogel moet vallen. Stel me niet teleur.", "spoor": "afbeeldingen camerabeelden: \nincidentwapenkamer.png\nincidentwapenkamerhulzen.png" },
+            { "id": "mission4", "order": 4, "lat": 52.13080791024424, "lng": 5.365163684943295, "cryptic": "Aan alle beschikbare eenheden regio Ede. Prioriteit 1. Dringend verzoek om assistentie bij een ernstig verkeersongeval op de Loes van Overeemlaan, nabij bushalte Schietbaan, Leusden. \n\nSituatie: Een zwart voertuig is na extreem gevaarlijk rijgedrag met hoge snelheid frontaal in botsing gekomen met een Connexxion lijnbus (Lijn 88 richting Ede Station). Er is sprake van zware materiële schade aan zowel de bus als de personenauto. Mogelijk letsel bij de passagiers in de bus.\n\nBijzonderheden: Het zwarte voertuig matcht met de eerdere meldingen over het gevaarlijke vluchtgedrag. Meerdere getuigen ter plaatse melden dat de inzittenden van het voertuig op dit moment in alle haast tassen en goederen uit de auto aan het trekken zijn. Ze proberen de locatie te voet te ontvluchten nog vóór de aankomst van de eerste eenheden.\n\nInstructie: Met spoed aanrijden. Eenheden in de omgeving dienen direct de omliggende straten en vluchtwegen af te grendelen om de verdachten te onderscheppen. Ambulance en brandweer zijn met prioriteit onderweg voor de hulpverlening in de bus. Benader de verdachten met verhoogde waakzaamheid. Geef door waarheen de betrokkenen zijn gevlucht. Geef door hoe de betrokkenen zijn gevlucht.", "description": "Luister goed. Er is een pakketje dat absoluut niet in de verkeerde handen mag vallen. De koerier heeft specifieke instructies gekregen: deze levering heeft prioriteit boven alles. Als er obstakels zijn, dan worden die omzeild. Als er vertraging dreigt, dan wordt er gas bijgegeven. Geen excuses, geen maren. Het belang van de familie staat op het spel. Zorg dat het aankomt, hoe dan ook..... Een ongeluk? Dit is exact het soort amateurisme waar ik een broertje dood aan heb. Ik vroeg om een snelle levering, niet om een mediaspektakel dat de hele politiemacht van de regio Amersfoort op onze nek haalt.\nAls dat pakketje nu door de recherche wordt gevonden, hebben die twee een veel groter probleem dan een paar gekneusde ribben. Zorg dat onze mensen ter plaatse zijn nog vóór de bergingsauto arriveert. De sporen moeten worden uitgewist, de auto moet leeg, en die twee malloten moeten verdwijnen uit het zicht van de autoriteiten. Incompetentie die de familie in gevaar brengt, tolereer ik niet. Regel het. Nu.", "spoor": "Afbeelding ongeluk connexxionbus: verkeersongeluk.png" },
+            { "id": "mission5", "order": 5, "lat": 52.131571583234894, "lng": 5.369203091268884, "cryptic": "Aan alle beschikbare eenheden regio Leusden Prioriteit 1. Verzoek om onderzoek naar een verdachte situatie in een woning. Exacte adresgegevens volgen via de MDT.\n\nSituatie: Via een betrouwbare bron is informatie binnengekomen dat er op dit moment een illegale overdracht plaatsvindt in de woning. Er zou een ontmoeting gaande zijn tussen een bewoner/contactpersoon en externe partijen.\n\nBijzonderheden: De transactie betreft vermoedelijk de uitwisseling van gevoelige documenten tegen een substantiële hoeveelheid verdovende middelen (harddrugs, omschreven als 'poeder'), welke verpakt zouden zitten in een doos. Er is een reële kans dat de betrokkenen proberen de locatie snel te verlaten zodra de overdracht is afgerond.\n\nInstructie: Benader de woning onopvallend en tactisch. Stel eventuele vluchtwegen aan de achterzijde van het pand veilig alvorens aan te bellen. Houd rekening met de aanwezigheid van meerdere personen binnen. Beschrijf wat je binnen aantreft.", "description": "Luister goed naar wat ik je nu ga zeggen. Op de afgesproken locatie staat een huis waar de documenten die we nodig hebben op je liggen te wachten. Dit zijn niet zomaar papieren; dit zijn de geheimen die onze positie veiligstellen.\n\nEr is binnen een contactpersoon aanwezig die precies weet waarom je komt. Je overhandigt de documenten, en in ruil daarvoor neem je onze specifieke hoeveelheid poeder mee... je weet precies wat ik bedoel, exact volgens de afspraak die we vooraf gemaakt hebben. Het staat klaar in de doos.\n\nGeen misverstanden, geen onnodige vragen. Je loopt naar binnen, handelt dit zakelijk af en zorgt dat alles geruisloos verloopt. Laat me zien dat ik op je kan rekenen. Succes.", "spoor": "Lijk TLO\nDoos\nDrugs" },
+            { "id": "mission6", "order": 6, "lat": 52.1305771043951, "lng": 5.3671699778875945, "cryptic": "Aan alle beschikbare eenheden regio Ede. Prioriteit 2. Verzoek om controle bij een leegstaande loods. Exacte locatiegegevens volgen via de MDT.\n\nSituatie: Er is zojuist een melding binnengekomen over verdachte activiteit rondom een verlaten loods. Een passant zag een persoon zich verdacht ophouden aan de achterzijde van het pand en vervolgens een oude kelderruimte betreden.\n\nBijzonderheden: Vermoeden bestaat dat deze locatie wordt gebruikt voor het stallen of verbergen van illegale goederen of bewijsmateriaal (mogelijk documenten of administratie gerelateerd aan eerdere incidenten). Er is vooralsnog geen sprake van directe dreiging of wapens, maar alertheid is geboden.\n\nInstructie: Rijdt aan zonder optische en geluidssignalen om de verdachte niet op te schrikken. Benader de achterzijde en de kelderruimte van de loods tactisch. Controleer de ruimte op eventueel achtergelaten goederen of nog aanwezige personen. Stel sporen veilig. Beschrijf wat je aantreft.", "description": "Luister goed. Het goud dat je zojuist hebt veiliggesteld is op dit moment ook levensgevaarlijk. De politie spit het hele Sintelplein binnenstebuiten en we kunnen geen enkel risico nemen.\n\nJe brengt het naar de oude kelderruimte achter de loods. Achter de derde steunpilaar zit een losse baksteen in de muur. Daar schuif je ze achter. Niemand komt daar, niemand zoekt daar. Als die papieren daar liggen, is het alsof ze nooit hebben bestaan.\n\nEn onthoud één ding: vanaf dit moment weet jij van niets, heb je niets gezien en ken je de naam van de contactpersoon niet meer. Als er ook maar één detail uitlekt naar de autoriteiten, dan weet je dat de familie dat niet ongestraft laat. Zorg dat het geregeld wordt, met de nodige discretie.", "spoor": "Stapel stenen" },
+            { "id": "mission7", "order": 7, "lat": 52.1326780223426, "lng": 5.368076571798458, "cryptic": "Aan alle beschikbare eenheden regio Leusden Prioriteit 2. Verzoek om verhoogde surveillance en waakzaamheid rondom het bedrijfspand. Exacte objectgegevens volgen direct via de MDT.\n\nSituatie: Er is zojuist via een interne veiligheidslijn een melding binnengekomen over een verdachte ontmoeting nabij de personeelsingang van het object. Een onbekende man heeft daar contact gezocht met een van de aanwezige beveiligers.\n\nBijzonderheden: Het sterke vermoeden bestaat dat er sprake is van een poging tot omkoping of intimidatie van het beveiligingspersoneel ('platleggen' van de beveiliging) met het oog op een geplande inbraak of insluiping tijdens de avonduren. De beveiliger in kwestie wordt momenteel intern gehoord. Er is mogelijk een foto van de ontmoeting gemaakt door een handlanger in de buurt.\n\nInstructie: Neem het object en de directe omgeving op in de lopende surveillance voor de avond- en nachtdienst. Let specifiek op personen die zich ophouden rondom de camera-opstellingen of nooduitgangen. Meld eventuele verdachte voertuigen direct aan de meldkamer. Geef signalement van verdachte personen.", "description": "Luister goed. Vanavond is de avond dat we het pand aan de binnenkant gaan bekijken, maar ik wil geen alarmbellen, geen honden en absoluut geen politie aan de deur. De beveiliging moet plat liggen nog vóór de zon ondergaat.\n\nEr loopt daar een bewaker rond die vatbaar is voor de juiste motivatie. Je zoekt hem op, je neemt hem apart en je zorgt ervoor dat hij inziet dat een goedgevulde envelop beter is voor zijn gezondheid en zijn portemonnee dan de held uithangen. Vertel hem precies hoe laat hij zijn ronde de andere kant op moet lopen en welke camera's er toevallig een uurtje 'storing' moeten hebben.\n\nEn ik wil bewijs dat de afspraak staat. Maak onopvallend een foto van de ontmoeting, zodat ik kan zien dat de deal gesloten is. Als die lichten vanavond uitgaan, slaan we onze slag. Zorg dat hij meewerkt—of zorg dat hij spijt krijgt dat hij ooit 'nee' heeft gezegd. Regel het.", "spoor": "Geld voor corruptie\nEnvelop voor criminelen met Geheime documenten 'classified.pdf'" },
+            { "id": "mission8", "order": 8, "lat": 52.131564996774756, "lng": 5.36609709267856, "cryptic": "Aan alle eenheden regio en grensbewaking. Prioriteit 1. Verzoek om scherpe controle en uitkijken naar een verdachte die tracht het land te ontvluchten middels identiteitsfraude.\n\nSituatie: Uit tactische informatie is gebleken dat het subject, bekend onder de alias 'Lowieke van Rubber', actief bezig is met het aannemen van een valse identiteit. Er zijn aanwijzingen dat er vervalste reisbescheiden en pasfoto's zijn klaargemaakt voor internationale vluchten, met als vermoedelijke bestemmingen Tokyo of Rio de Janeiro.\n\nBijzonderheden: De verdachte maakt gebruik van hoogwaardig vervalste documenten en zal proberen de grenscontrole te passeren onder een gefingeerde naam. Het subject staat gesignaleerd.\n\nInstructie: Directe afstemming met de Koninklijke Marechaussee op de uitvalswegen en luchthavens. Bij aantreffen van personen die voldoen aan het signalement van de eerdere mugshots, direct overgaan tot staandehouding en verificatie van de biometrische gegevens. Benadering met verhoogde waakzaamheid. Maak een lijst op van reisplannen en bestemmingen.", "description": "Luister goed naar me. De grond onder onze voeten wordt te heet. De recherche spit elk dossier door en die OC-meldingen bewijzen dat ze ons op het spoor zijn. Het is tijd voor het noodplan. Tokyo en Rio de Janeiro liggen klaar, maar je gaat niet als jezelf de grens over.\n\nLowieke van Rubber bestaat vanaf vandaag niet meer voor de douane. Je pakt die valse pasfoto's en de klaargemaakte reisbescheiden die we hebben gefabriceerd. Vanaf dit moment neem je de identiteit aan van de persoon op die papieren. Je leert zijn naam, zijn geboortedatum en zijn achtergrond uit je hoofd. Geen aarzeling bij de grenscontrole, geen zenuwachtig gedrag.\n\nAls ze je paspoort scannen, ben jij die ander. Je stapt dat vliegtuig in, laat je oude leven hier achter en zorgt dat je aan de andere kant van de wereld onder de radar verdwijnt. Identiteitsfraude is onze enige ticket naar vrijheid. Verpruts het niet, want een tweede kans krijg je niet van me. Verdwijn.", "spoor": "reisbescheiden japan, Brazillië , alles\ndoos met reispapieren in Souterrain" },
+            { "id": "mission9", "order": 9, "lat": 52.132, "lng": 5.365, "cryptic": "De achtervolging is ingezet. De criminelen moeten sporen uitwissen. Een foto van de afgelegde weg is vereist.", "description": "De achtervolging is ingezet. Zorg dat jullie sporen uitwissen. Maak een foto van de weg die jullie hebben afgelegd.", "spoor": "" },
+            { "id": "mission10", "order": 10, "lat": 52.13257263059253, "lng": 5.371316703933494, "cryptic": "De documenten bevatten geheime codes. De handlanger moet een code onthouden. Laat de hunters de code zien.", "description": "De documenten bevatten geheime codes. Laat de handlanger een code onthouden. Maak een foto van de code.", "spoor": "" },
+            { "id": "mission11", "order": 11, "lat": 52.1305, "lng": 5.3655, "cryptic": "Er is een checkpoint. De handlanger moet de wacht omkopen. Een foto van de omkoping is vereist.", "description": "Er is een checkpoint. Laat de handlanger de wacht omkopen. Maak een foto van de omkoping.", "spoor": "" },
+            { "id": "mission12", "order": 12, "lat": 52.131, "lng": 5.3675, "cryptic": "De documenten moeten worden overhandigd aan de opdrachtgever. Een foto van de overhandiging is vereist.", "description": "Jullie moeten de documenten overhandigen aan de opdrachtgever. Maak een foto van de overhandiging.", "spoor": "" },
+            { "id": "mission13", "order": 13, "lat": 52.1325, "lng": 5.3665, "cryptic": "De opdrachtgever wil een teken van loyaliteit. Laat de handlanger met een wapen zien.", "description": "De opdrachtgever wil een teken van jullie loyaliteit. Maak een foto van jullie team met een wapen.", "spoor": "" },
+            { "id": "mission14", "order": 14, "lat": 52.1308, "lng": 5.3682, "cryptic": "De ontsnapping per helikopter is de laatste stap. Een foto van de helikopter is vereist.", "description": "Einddoel: ontsnapping per helikopter. Maak een foto van de helikopter.", "spoor": "" }
+        ];
 
         // ============================================================
         // DOM REFS
@@ -629,13 +305,13 @@
         const currentMissionNum = document.getElementById('currentMissionNum');
         const autoAdvanceNotice = document.getElementById('autoAdvanceNotice');
         const missionCompleteBanner = document.getElementById('missionCompleteBanner');
-
         const missionNoteInput = document.getElementById('missionNoteInput');
         const sendNoteBtn = document.getElementById('sendNoteBtn');
         const noteStatus = document.getElementById('noteStatus');
         const godfatherChatInput = document.getElementById('godfatherChatInput');
         const godfatherSendBtn = document.getElementById('godfatherSendBtn');
         const godfatherChatMessages = document.getElementById('godfatherChatMessages');
+        const photoHint = document.getElementById('photoHint');
 
         // ============================================================
         // STATE
@@ -659,37 +335,29 @@
         let missionTimeoutId = null;
         let isMissionActive = false;
         let missionOrder = [];
-        let missionIndex = 0;
-        let allMissionIds = [];
         let pingTimer = null;
         let isGameComplete = false;
+        let lastKnownPosition = null; // { lat, lng }
 
         // ============================================================
         // HELPERS
         // ============================================================
         function getTimestamp() { return Date.now(); }
-
         function deg2rad(deg) { return deg * (Math.PI / 180); }
-
         function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const dLat = deg2rad(lat2 - lat1);
             const dLon = deg2rad(lon2 - lon1);
-            const a =
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(deg2rad(lat1))*Math.cos(deg2rad(lat2))*Math.sin(dLon/2)*Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             return R * c;
         }
-
         function formatTime(seconds) {
             if (seconds < 0) seconds = 0;
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
         }
-
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -697,19 +365,17 @@
             }
             return arr;
         }
-
         function setStatus(el, msg, type = 'info') {
             el.textContent = msg;
             el.className = type;
         }
-
         function showScreen(screenId) {
             [loginScreen, criminalScreen].forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
         }
 
         // ============================================================
-        // TIMER (algemeen)
+        // TIMER
         // ============================================================
         function updateGlobalTimer() {
             const el = document.getElementById('criminalTimerValue');
@@ -720,17 +386,11 @@
                 const elapsed = Math.floor((Date.now() - start) / 1000);
                 const remaining = Math.max(0, GAME_DURATION - elapsed);
                 el.textContent = formatTime(remaining);
-                if (remaining <= 0) {
-                    el.classList.add('timer-warning');
-                } else {
-                    el.classList.remove('timer-warning');
-                }
+                if (remaining <= 0) el.classList.add('timer-warning');
+                else el.classList.remove('timer-warning');
             });
         }
 
-        // ============================================================
-        // MISSIE TIMER (6 minuten)
-        // ============================================================
         function startMissionTimer() {
             if (missionTimerInterval) clearInterval(missionTimerInterval);
             if (missionTimeoutId) clearTimeout(missionTimeoutId);
@@ -740,26 +400,16 @@
                 const elapsed = (Date.now() - missionStartTime) / 1000;
                 const remaining = Math.max(0, MISSION_TIMEOUT - elapsed);
                 missionTimerDisplay.textContent = formatTime(remaining);
-                if (remaining <= 0) {
-                    missionTimerDisplay.classList.add('timer-warning');
-                } else {
-                    missionTimerDisplay.classList.remove('timer-warning');
-                }
+                if (remaining <= 0) missionTimerDisplay.classList.add('timer-warning');
+                else missionTimerDisplay.classList.remove('timer-warning');
             }, 500);
-
             missionTimeoutId = setTimeout(() => {
-                if (!missionCompleted && isMissionActive) {
-                    console.log('⏰ 6 minuten verstreken, automatisch door naar volgende missie');
-                    autoAdvanceMission();
-                }
+                if (!missionCompleted && isMissionActive) autoAdvanceMission();
             }, MISSION_TIMEOUT * 1000);
         }
-
         function stopMissionTimer() {
-            if (missionTimerInterval) { clearInterval(missionTimerInterval);
-                missionTimerInterval = null; }
-            if (missionTimeoutId) { clearTimeout(missionTimeoutId);
-                missionTimeoutId = null; }
+            if (missionTimerInterval) { clearInterval(missionTimerInterval); missionTimerInterval = null; }
+            if (missionTimeoutId) { clearTimeout(missionTimeoutId); missionTimeoutId = null; }
             missionTimerDisplay.textContent = '--:--';
             missionTimerDisplay.classList.remove('timer-warning');
             missionStartTime = null;
@@ -771,28 +421,17 @@
         function initMap() {
             if (!map) {
                 map = L.map('criminalMap').setView([52.13, 5.366], 15);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
             }
             return map;
         }
-
         function updateMap(lat, lng) {
             const m = initMap();
-            if (marker) { m.removeLayer(marker);
-                marker = null; }
-            if (circle) { m.removeLayer(circle);
-                circle = null; }
+            if (marker) { m.removeLayer(marker); marker = null; }
+            if (circle) { m.removeLayer(circle); circle = null; }
             if (lat && lng) {
-                marker = L.marker([lat, lng]).addTo(m)
-                    .bindPopup(`<strong>📍 Missielocatie</strong><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-                circle = L.circle([lat, lng], {
-                    color: '#f0c040',
-                    fillColor: '#f0c040',
-                    fillOpacity: 0.2,
-                    radius: MISSION_RADIUS
-                }).addTo(m);
+                marker = L.marker([lat, lng]).addTo(m).bindPopup(`<strong>📍 Missielocatie</strong><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                circle = L.circle([lat, lng], { color: '#f0c040', fillColor: '#f0c040', fillOpacity: 0.2, radius: MISSION_RADIUS }).addTo(m);
                 m.setView([lat, lng], 16);
                 setTimeout(() => m.invalidateSize(), 150);
             }
@@ -801,10 +440,7 @@
         // ============================================================
         // MISSIE LOGICA
         // ============================================================
-        function getMissionById(id) {
-            return MISSION_DATA.find(m => m.id === id) || null;
-        }
-
+        function getMissionById(id) { return MISSION_DATA.find(m => m.id === id) || null; }
         function buildMissionOrder() {
             const first = MISSION_DATA.filter(m => m.id === 'mission1');
             const rest = MISSION_DATA.filter(m => m.id !== 'mission1');
@@ -813,147 +449,139 @@
             return order.map(m => m.id);
         }
 
-        async function assignNextMission() {
-            if (isGameComplete) return;
+        async function completeMission(completionType, extraData = null) {
+            if (missionCompleted || !isMissionActive) return;
+            if (!missionUnlocked) {
+                setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning');
+                return;
+            }
+            missionCompleted = true;
+            isMissionActive = false;
+            stopMissionTimer();
 
             const playerSnap = await get(playerRef);
             const player = playerSnap.val();
-            if (!player) return;
-
             const completed = player.completedMissions || [];
-
-            let nextId = null;
-            for (const id of missionOrder) {
-                if (!completed.includes(id)) {
-                    nextId = id;
-                    break;
-                }
+            if (!completed.includes(currentMissionId)) {
+                completed.push(currentMissionId);
+                await update(playerRef, { completedMissions: completed, currentMissionId: null });
             }
 
+            const chatsRef = ref(db, `klassen/${className}/chats`);
+            let msg = `📌 Missie ${currentMissionId} voltooid`;
+            if (completionType === 'note') msg += ` via notitie: "${extraData}"`;
+            else if (completionType === 'photo') msg += ` met bewijsfoto.`;
+            else msg += `.`;
+            await push(chatsRef, { sender: '✅ Missie', text: msg, timestamp: getTimestamp(), isSystem: true });
+
+            missionFull.classList.add('hidden');
+            missionCompleteBanner.classList.remove('hidden');
+            missionCompleteBanner.innerHTML = `<h2>✅ Missie voltooid!</h2><p>${completionType === 'photo' ? 'Bewijs geüpload' : 'Notitie verzonden'}. Nieuwe missie wordt geladen...</p>`;
+            setTimeout(() => {
+                missionCompleteBanner.classList.add('hidden');
+                assignNextMission();
+            }, 2000);
+        }
+
+        async function assignNextMission() {
+            if (isGameComplete) return;
+            const playerSnap = await get(playerRef);
+            const player = playerSnap.val();
+            if (!player) return;
+            const completed = player.completedMissions || [];
+            let nextId = null;
+            for (const id of missionOrder) {
+                if (!completed.includes(id)) { nextId = id; break; }
+            }
             if (!nextId) {
                 isGameComplete = true;
                 missionCryptic.textContent = '🏆 Gefeliciteerd! Je hebt alle missies voltooid en bent ontsnapt!';
                 missionFull.classList.add('hidden');
                 missionCompleteBanner.classList.remove('hidden');
-                missionCompleteBanner.innerHTML = `
-                    <h2>🏆 ONTSNAPT!</h2>
-                    <p>Je hebt alle 8 missies succesvol afgerond. De hunters kunnen je niet meer pakken!</p>
-                `;
+                missionCompleteBanner.innerHTML = `<h2>🏆 ONTSNAPT!</h2><p>Je hebt alle ${missionOrder.length} missies succesvol afgerond. De hunters kunnen je niet meer pakken!</p>`;
                 criminalExtractLoc.textContent = '🏆 Ontsnapt!';
                 document.getElementById('criminalStatusBadge').textContent = '✅ Ontsnapt';
                 document.getElementById('criminalStatusBadge').className = 'badge badge-success';
                 stopMissionTimer();
-                if (watchPositionId) { navigator.geolocation.clearWatch(watchPositionId);
-                    watchPositionId = null; }
+                if (watchPositionId) { navigator.geolocation.clearWatch(watchPositionId); watchPositionId = null; }
                 await update(playerRef, { extractReached: true, status: 'escaped' });
-                // Verberg mapcontainer
                 mapContainer.classList.add('hidden');
                 return;
             }
-
             await update(playerRef, { currentMissionId: nextId });
         }
 
         async function loadMission(missionId) {
             const mission = getMissionById(missionId);
-            if (!mission) {
-                console.error('Missie niet gevonden:', missionId);
-                return;
-            }
-
+            if (!mission) { console.error('Missie niet gevonden:', missionId); return; }
             currentMissionId = missionId;
             currentMissionData = mission;
             missionCompleted = false;
             missionUnlocked = false;
             isMissionActive = true;
 
-            // Toon cryptische omschrijving
             missionCryptic.textContent = mission.cryptic || 'Geen omschrijving.';
             missionDescription.textContent = mission.description || 'Geen omschrijving.';
+            if (mission.spoor) { spoorDisplay.classList.remove('hidden'); spoorContent.textContent = mission.spoor; }
+            else { spoorDisplay.classList.add('hidden'); }
 
-            // Toon spoor
-            if (mission.spoor) {
-                spoorDisplay.classList.remove('hidden');
-                spoorContent.textContent = mission.spoor;
-            } else {
-                spoorDisplay.classList.add('hidden');
-            }
-
-            // Verberg volledige opdracht (wordt zichtbaar bij ontgrendeling)
             missionFull.classList.add('hidden');
             missionCompleteBanner.classList.add('hidden');
             document.getElementById('noteArea').style.display = 'none';
+            photoHint.textContent = '';
 
-            // Toon kaartcontainer
             mapContainer.classList.remove('hidden');
-
-            // Update locatie in header
             const idx = missionOrder.indexOf(missionId) + 1;
             const total = missionOrder.length;
             currentMissionNum.textContent = idx;
             criminalExtractLoc.textContent = `📍 ${mission.description.substring(0, 50)}...`;
-
-            // Update kaart (altijd zichtbaar)
             updateMap(mission.lat, mission.lng);
 
-            // Start tracking
             startLocationTracking(mission);
-
-            // Start missie timer (6 min)
             stopMissionTimer();
             startMissionTimer();
 
-            // Stuur een chatbericht dat de missie is toegewezen
             const chatsRef = ref(db, `klassen/${className}/chats`);
-            await push(chatsRef, {
-                sender: '🕵️ Opdrachtgever',
-                text: `📨 Nieuwe missie: ${mission.cryptic.substring(0, 80)}... Ga naar de locatie!`,
-                timestamp: getTimestamp(),
-                isSystem: true
-            });
+            await push(chatsRef, { sender: '🕵️ Opdrachtgever', text: `📨 Nieuwe missie: ${mission.cryptic.substring(0, 80)}... Ga naar de locatie!`, timestamp: getTimestamp(), isSystem: true });
 
-            // Zet status
+            missionNoteInput.placeholder = mission.description || 'Voer je bevindingen in...';
+            photoHint.textContent = `📸 ` + (mission.description || 'Maak een bewijsfoto');
             missionFull.querySelector('.photo-upload-area').style.display = 'flex';
             proofUploadStatus.textContent = '';
             uploadProofBtn.disabled = false;
             autoAdvanceNotice.style.display = 'block';
-
             await update(playerRef, { currentMissionId: missionId });
         }
 
         // ============================================================
-        // LOCATIE TRACKING
+        // LOCATIE TRACKING (bewaart laatste positie)
         // ============================================================
         function startLocationTracking(mission) {
             if (!mission || !mission.lat || !mission.lng) return;
             if (watchPositionId) navigator.geolocation.clearWatch(watchPositionId);
-
-            if (!navigator.geolocation) {
-                distanceDisplay.textContent = '❌ Geolocatie niet ondersteund';
-                return;
-            }
+            if (!navigator.geolocation) { distanceDisplay.textContent = '❌ Geolocatie niet ondersteund'; return; }
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    const dist = getDistanceFromLatLonInMeters(pos.coords.latitude, pos.coords.longitude, mission.lat, mission
-                        .lng);
+                    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+                    lastKnownPosition = { lat, lng };
+                    const dist = getDistanceFromLatLonInMeters(lat, lng, mission.lat, mission.lng);
                     distanceDisplay.textContent = Math.round(dist);
                     checkProximity(dist);
                 },
-                (err) => { console.warn('Positie error:', err);
-                    distanceDisplay.textContent = '?'; },
+                (err) => { console.warn('Positie error:', err); distanceDisplay.textContent = '?'; },
                 { enableHighAccuracy: true, timeout: 5000 }
             );
 
             watchPositionId = navigator.geolocation.watchPosition(
                 (pos) => {
-                    const dist = getDistanceFromLatLonInMeters(pos.coords.latitude, pos.coords.longitude, mission.lat, mission
-                        .lng);
+                    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+                    lastKnownPosition = { lat, lng };
+                    const dist = getDistanceFromLatLonInMeters(lat, lng, mission.lat, mission.lng);
                     distanceDisplay.textContent = Math.round(dist);
                     checkProximity(dist);
                 },
-                (err) => { console.warn('Watch error:', err);
-                    distanceDisplay.textContent = '?'; },
+                (err) => { console.warn('Watch error:', err); distanceDisplay.textContent = '?'; },
                 { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
             );
         }
@@ -969,10 +597,8 @@
                     spoorContent.textContent = currentMissionData.spoor;
                 }
                 document.getElementById('noteArea').style.display = 'block';
-                setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en upload het bewijs.',
-                    'success');
-                const chatsRef = ref(db, `klassen/${className}/chats`);
-                push(chatsRef, {
+                setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en voltooi de missie.', 'success');
+                push(ref(db, `klassen/${className}/chats`), {
                     sender: '📍 Locatie',
                     text: `✅ Team is aangekomen bij de missielocatie: ${currentMissionData.id}`,
                     timestamp: getTimestamp(),
@@ -982,7 +608,38 @@
         }
 
         // ============================================================
-        // BEWIJS FOTO UPLOADEN
+        // PINGS – nu strak elke 3 minuten
+        // ============================================================
+        function sendPing() {
+            if (!lastKnownPosition) {
+                // Fallback als er nog geen positie is
+                push(ref(db, `klassen/${className}/pings`), {
+                    teamName: teamName,
+                    latitude: 52.13,
+                    longitude: 5.366,
+                    timestamp: getTimestamp()
+                }).catch(err => console.warn('Ping mislukt (geen positie):', err));
+                return;
+            }
+            push(ref(db, `klassen/${className}/pings`), {
+                teamName: teamName,
+                latitude: lastKnownPosition.lat,
+                longitude: lastKnownPosition.lng,
+                timestamp: getTimestamp()
+            }).catch(err => console.warn('Ping mislukt:', err));
+        }
+
+        function schedulePing() {
+            if (pingTimer) clearTimeout(pingTimer);
+            // Strakke interval van 3 minuten (180.000 ms)
+            pingTimer = setTimeout(() => {
+                sendPing();
+                schedulePing(); // blijft herhalen
+            }, 3 * 60 * 1000);
+        }
+
+        // ============================================================
+        // BEWIJS FOTO UPLOAD
         // ============================================================
         async function uploadProofPhoto(file) {
             if (!file) return;
@@ -994,16 +651,13 @@
                 setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning');
                 return;
             }
-
             setStatus(proofUploadStatus, '⏳ Uploaden...', 'info');
             uploadProofBtn.disabled = true;
-
             try {
                 const fileName = `proof_${Date.now()}_${file.name}`;
                 const storageReference = storageRef(storage, `klassen/${className}/proofs/${fileName}`);
                 await uploadBytes(storageReference, file);
                 const downloadURL = await getDownloadURL(storageReference);
-
                 const photosRef = ref(db, `klassen/${className}/photos`);
                 await push(photosRef, {
                     uploader: `${teamName} (C)`,
@@ -1013,42 +667,8 @@
                     missionId: currentMissionId,
                     missionDescription: currentMissionData?.description?.substring(0, 100) || ''
                 });
-
                 setStatus(proofUploadStatus, '✅ Bewijs geüpload! Missie voltooid.', 'success');
-                missionCompleted = true;
-                isMissionActive = false;
-                missionFull.classList.add('hidden');
-                missionCompleteBanner.classList.remove('hidden');
-                missionCompleteBanner.innerHTML = `
-                    <h2>✅ Missie voltooid!</h2>
-                    <p>Bewijs is geüpload. Nieuwe missie wordt geladen...</p>
-                `;
-                stopMissionTimer();
-
-                const playerSnap = await get(playerRef);
-                const player = playerSnap.val();
-                const completed = player.completedMissions || [];
-                if (!completed.includes(currentMissionId)) {
-                    completed.push(currentMissionId);
-                    await update(playerRef, {
-                        completedMissions: completed,
-                        currentMissionId: null
-                    });
-                }
-
-                const chatsRef = ref(db, `klassen/${className}/chats`);
-                await push(chatsRef, {
-                    sender: '✅ Missie',
-                    text: `📌 Missie ${currentMissionId} voltooid! Bewijs geüpload.`,
-                    timestamp: getTimestamp(),
-                    isSystem: true
-                });
-
-                setTimeout(() => {
-                    missionCompleteBanner.classList.add('hidden');
-                    assignNextMission();
-                }, 2000);
-
+                await completeMission('photo');
             } catch (err) {
                 setStatus(proofUploadStatus, '❌ Fout: ' + err.message, 'error');
                 uploadProofBtn.disabled = false;
@@ -1056,27 +676,21 @@
         }
 
         // ============================================================
-        // AUTO ADVANCE (6 min)
+        // AUTO ADVANCE
         // ============================================================
         async function autoAdvanceMission() {
             if (missionCompleted || !isMissionActive) return;
-            console.log('⏰ Auto-advance triggered for mission:', currentMissionId);
-
+            console.log('⏰ Auto-advance for mission:', currentMissionId);
             missionCompleted = true;
             isMissionActive = false;
             stopMissionTimer();
-
             const playerSnap = await get(playerRef);
             const player = playerSnap.val();
             const completed = player.completedMissions || [];
             if (!completed.includes(currentMissionId)) {
                 completed.push(currentMissionId);
-                await update(playerRef, {
-                    completedMissions: completed,
-                    currentMissionId: null
-                });
+                await update(playerRef, { completedMissions: completed, currentMissionId: null });
             }
-
             const chatsRef = ref(db, `klassen/${className}/chats`);
             await push(chatsRef, {
                 sender: '⏰ Tijd',
@@ -1084,47 +698,26 @@
                 timestamp: getTimestamp(),
                 isSystem: true
             });
-
             missionFull.classList.add('hidden');
             missionCompleteBanner.classList.remove('hidden');
-            missionCompleteBanner.innerHTML = `
-                <h2>⏱️ Tijd verstreken</h2>
-                <p>Automatisch door naar de volgende missie...</p>
-            `;
-
-            setTimeout(() => {
-                missionCompleteBanner.classList.add('hidden');
-                assignNextMission();
-            }, 1500);
+            missionCompleteBanner.innerHTML = `<h2>⏱️ Tijd verstreken</h2><p>Automatisch door naar de volgende missie...</p>`;
+            setTimeout(() => { missionCompleteBanner.classList.add('hidden'); assignNextMission(); }, 1500);
         }
 
         // ============================================================
-        // FOTO FEED (live)
+        // FOTO FEED
         // ============================================================
         function initPhotoFeed() {
             const photosRef = ref(db, `klassen/${className}/photos`);
             onValue(photosRef, (snapshot) => {
                 const data = snapshot.val();
-                if (!data) {
-                    photoFeed.innerHTML = '<div style="color:#8899aa;">Geen foto’s.</div>';
-                    return;
-                }
+                if (!data) { photoFeed.innerHTML = '<div style="color:#8899aa;">Geen foto’s.</div>'; return; }
                 let html = '';
-                const keys = Object.keys(data).sort((a, b) => data[b].timestamp - data[a].timestamp);
+                const keys = Object.keys(data).sort((a,b) => data[b].timestamp - data[a].timestamp);
                 for (const key of keys) {
                     const p = data[key];
                     const isProof = p.type === 'proof';
-                    html += `
-                        <div class="photo-item">
-                            <img src="${p.imageUrl}" alt="Foto" loading="lazy" />
-                            <div class="meta">
-                                <span class="uploader">${p.uploader || 'Onbekend'}</span>
-                                <span>${new Date(p.timestamp).toLocaleString()}</span>
-                                ${isProof ? ' <span style="color:#f0c040;">📜 Bewijs</span>' : ''}
-                                ${p.missionId ? ` <span style="color:#8899aa;font-size:0.7rem;">${p.missionId}</span>` : ''}
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="photo-item"><img src="${p.imageUrl}" alt="Foto" loading="lazy" /><div class="meta"><span class="uploader">${p.uploader || 'Onbekend'}</span><span>${new Date(p.timestamp).toLocaleString()}</span>${isProof ? ' <span style="color:#f0c040;">📜 Bewijs</span>' : ''}${p.missionId ? ` <span style="color:#8899aa;font-size:0.7rem;">${p.missionId}</span>` : ''}</div></div>`;
                 }
                 photoFeed.innerHTML = html || '<div style="color:#8899aa;">Geen foto’s.</div>';
             });
@@ -1139,23 +732,14 @@
             onValue(chatsRef, (snapshot) => {
                 const data = snapshot.val();
                 const chatDiv = document.getElementById('criminalChatMessages');
-                if (!data) {
-                    chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>';
-                    return;
-                }
+                if (!data) { chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>'; return; }
                 let html = '';
-                const keys = Object.keys(data).sort((a, b) => data[a].timestamp - data[b].timestamp);
+                const keys = Object.keys(data).sort((a,b) => data[a].timestamp - data[b].timestamp);
                 for (const key of keys) {
                     const msg = data[key];
                     const isSystem = msg.isSystem || false;
                     const senderClass = isSystem ? 'color:#f0c040;' : '';
-                    html += `
-                        <div class="chat-message">
-                            <span class="sender" style="${senderClass}">${msg.sender || 'Onbekend'}:</span>
-                            <span>${msg.text}</span>
-                            <span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-                        </div>
-                    `;
+                    html += `<div class="chat-message"><span class="sender" style="${senderClass}">${msg.sender || 'Onbekend'}:</span><span>${msg.text}</span><span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span></div>`;
                 }
                 chatDiv.innerHTML = html || '<div style="color:#8899aa;">Geen berichten.</div>';
                 chatDiv.scrollTop = chatDiv.scrollHeight;
@@ -1165,25 +749,16 @@
             onValue(chatsRef, (snapshot) => {
                 const data = snapshot.val();
                 const chatDiv = document.getElementById('godfatherChatMessages');
-                if (!data) {
-                    chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>';
-                    return;
-                }
+                if (!data) { chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>'; return; }
                 let html = '';
-                const keys = Object.keys(data).sort((a, b) => data[a].timestamp - data[b].timestamp);
+                const keys = Object.keys(data).sort((a,b) => data[a].timestamp - data[b].timestamp);
                 for (const key of keys) {
                     const msg = data[key];
                     const sender = msg.sender || '';
                     if (sender.includes('Godfather') || sender.includes('Vraag aan Godfather')) {
                         const isSystem = msg.isSystem || false;
                         const senderClass = isSystem ? 'color:#f0c040;' : '';
-                        html += `
-                            <div class="chat-message">
-                                <span class="sender" style="${senderClass}">${sender}:</span>
-                                <span>${msg.text}</span>
-                                <span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-                            </div>
-                        `;
+                        html += `<div class="chat-message"><span class="sender" style="${senderClass}">${sender}:</span><span>${msg.text}</span><span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span></div>`;
                     }
                 }
                 chatDiv.innerHTML = html || '<div style="color:#8899aa;">Geen berichten.</div>';
@@ -1193,82 +768,32 @@
             document.getElementById('criminalSendChatBtn').addEventListener('click', async () => {
                 const text = document.getElementById('criminalChatInput').value.trim();
                 if (!text) return;
-                await push(chatsRef, {
-                    sender: `${teamName} (C)`,
-                    text: text,
-                    timestamp: getTimestamp(),
-                    isSystem: false
-                });
+                await push(chatsRef, { sender: `${teamName} (C)`, text: text, timestamp: getTimestamp(), isSystem: false });
                 document.getElementById('criminalChatInput').value = '';
             });
-
             document.getElementById('criminalChatInput').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('criminalSendChatBtn').click();
-                }
+                if (e.key === 'Enter') document.getElementById('criminalSendChatBtn').click();
             });
 
             sendNoteBtn.addEventListener('click', async () => {
                 const text = missionNoteInput.value.trim();
-                if (!text) {
-                    setStatus(noteStatus, 'Voer een notitie in.', 'warning');
-                    return;
-                }
-                if (!missionUnlocked) {
-                    setStatus(noteStatus, 'Je bent nog niet bij de locatie.', 'warning');
-                    return;
-                }
-                await push(chatsRef, {
-                    sender: `📝 Notitie (${teamName})`,
-                    text: text,
-                    timestamp: getTimestamp(),
-                    isSystem: false
-                });
-                setStatus(noteStatus, '✅ Notitie verzonden!', 'success');
+                if (!text) { setStatus(noteStatus, 'Voer een notitie in.', 'warning'); return; }
+                if (!missionUnlocked) { setStatus(noteStatus, 'Je bent nog niet bij de locatie.', 'warning'); return; }
+                await push(chatsRef, { sender: `📝 Notitie (${teamName})`, text: text, timestamp: getTimestamp(), isSystem: false });
+                setStatus(noteStatus, '✅ Notitie verzonden! Missie voltooid.', 'success');
                 missionNoteInput.value = '';
-                setTimeout(() => { setStatus(noteStatus, '', 'info'); }, 3000);
+                await completeMission('note', text);
             });
 
             godfatherSendBtn.addEventListener('click', async () => {
                 const text = godfatherChatInput.value.trim();
                 if (!text) return;
-                await push(chatsRef, {
-                    sender: `❓ Vraag aan Godfather (${teamName})`,
-                    text: text,
-                    timestamp: getTimestamp(),
-                    isSystem: false
-                });
+                await push(chatsRef, { sender: `❓ Vraag aan Godfather (${teamName})`, text: text, timestamp: getTimestamp(), isSystem: false });
                 godfatherChatInput.value = '';
             });
-
             godfatherChatInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    godfatherSendBtn.click();
-                }
+                if (e.key === 'Enter') godfatherSendBtn.click();
             });
-        }
-
-        // ============================================================
-        // PINGS
-        // ============================================================
-        function sendPing() {
-            const lat = 52.13 + (Math.random() - 0.5) * 0.01;
-            const lng = 5.366 + (Math.random() - 0.5) * 0.01;
-            push(ref(db, `klassen/${className}/pings`), {
-                teamName: teamName,
-                latitude: lat,
-                longitude: lng,
-                timestamp: getTimestamp()
-            }).catch(err => console.warn('Ping mislukt:', err));
-        }
-
-        function schedulePing() {
-            if (pingTimer) clearTimeout(pingTimer);
-            const interval = Math.floor(Math.random() * (15 * 60 * 1000 - 2 * 60 * 1000) + 2 * 60 * 1000);
-            pingTimer = setTimeout(() => {
-                sendPing();
-                schedulePing();
-            }, interval);
         }
 
         // ============================================================
@@ -1282,8 +807,7 @@
                 const storageReference = storageRef(storage, `klassen/${className}/photos/${fileName}`);
                 await uploadBytes(storageReference, file);
                 const downloadURL = await getDownloadURL(storageReference);
-                const photosRef = ref(db, `klassen/${className}/photos`);
-                await push(photosRef, {
+                await push(ref(db, `klassen/${className}/photos`), {
                     uploader: `${teamName} (C)`,
                     imageUrl: downloadURL,
                     timestamp: getTimestamp(),
@@ -1301,14 +825,8 @@
         loginBtn.addEventListener('click', async () => {
             const name = usernameInput.value.trim();
             className = classSelect.value;
-
-            if (!name) {
-                setStatus(loginStatus, 'Voer een teamnaam in.', 'error');
-                return;
-            }
-
+            if (!name) { setStatus(loginStatus, 'Voer een teamnaam in.', 'error'); return; }
             setStatus(loginStatus, '🔄 Inloggen...', 'info');
-
             try {
                 playerRef = ref(db, `klassen/${className}/players/${name}`);
                 const snapshot = await get(playerRef);
@@ -1316,7 +834,6 @@
                     setStatus(loginStatus, '❌ Deze teamnaam is al in gebruik in deze klas.', 'error');
                     return;
                 }
-
                 const playerData = {
                     role: 'criminal',
                     teamName: name,
@@ -1334,7 +851,6 @@
                     currentMissionId: null
                 };
                 await set(playerRef, playerData);
-
                 teamName = name;
                 setStatus(loginStatus, `✅ Ingelogd als crimineel in klas ${className}`, 'success');
                 showScreen('criminalScreen');
@@ -1344,23 +860,15 @@
             }
         });
 
-        // ============================================================
-        // CRIMINEEL DASHBOARD
-        // ============================================================
         function initCriminalDashboard(teamName, className) {
             updateGlobalTimer();
             setInterval(() => updateGlobalTimer(), 1000);
-
             document.getElementById('criminalTeamName').textContent = `${teamName} (${className})`;
 
             gameStatusRef = ref(db, `klassen/${className}/game/status`);
-            missionsRef = ref(db, `klassen/${className}/missions`);
-
             missionOrder = buildMissionOrder();
             console.log('📋 Missie volgorde:', missionOrder);
-            document.getElementById('missionCounter').innerHTML =
-                `Missie <strong id="currentMissionNum">0</strong> van <strong>${missionOrder.length}</strong>`;
-
+            document.getElementById('missionCounter').innerHTML = `Missie <strong id="currentMissionNum">0</strong> van <strong>${missionOrder.length}</strong>`;
             initMap();
 
             onValue(gameStatusRef, async (snapshot) => {
@@ -1370,17 +878,13 @@
                     waitingMessage.classList.add('hidden');
                     const playerSnap = await get(playerRef);
                     const player = playerSnap.val();
-                    if (player && player.currentMissionId) {
-                        await loadMission(player.currentMissionId);
-                    } else if (player && !player.currentMissionId && !isGameComplete) {
-                        await assignNextMission();
-                    }
+                    if (player && player.currentMissionId) await loadMission(player.currentMissionId);
+                    else if (player && !player.currentMissionId && !isGameComplete) await assignNextMission();
                     schedulePing();
                 } else {
                     gameStarted = false;
                     waitingMessage.classList.remove('hidden');
-                    if (pingTimer) { clearTimeout(pingTimer);
-                        pingTimer = null; }
+                    if (pingTimer) { clearTimeout(pingTimer); pingTimer = null; }
                 }
             });
 
@@ -1401,41 +905,25 @@
             initChat();
 
             uploadProofBtn.addEventListener('click', () => {
-                if (!missionUnlocked) {
-                    setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning');
-                    return;
-                }
-                if (missionCompleted) {
-                    setStatus(proofUploadStatus, '⚠️ Deze missie is al voltooid.', 'warning');
-                    return;
-                }
+                if (!missionUnlocked) { setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning'); return; }
+                if (missionCompleted) { setStatus(proofUploadStatus, '⚠️ Deze missie is al voltooid.', 'warning'); return; }
                 proofPhotoInput.click();
             });
-
             proofPhotoInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
-                if (file) {
-                    uploadProofPhoto(file);
-                }
+                if (file) uploadProofPhoto(file);
                 proofPhotoInput.value = '';
             });
 
-            uploadPhotoBtn.addEventListener('click', () => {
-                photoInput.click();
-            });
-
+            uploadPhotoBtn.addEventListener('click', () => photoInput.click());
             photoInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
-                if (file) {
-                    uploadPhoto(file);
-                }
+                if (file) uploadPhoto(file);
                 photoInput.value = '';
             });
 
             document.getElementById('criminalLogoutBtn').addEventListener('click', () => {
-                if (confirm('Weet je zeker dat je wilt uitloggen?')) {
-                    logout();
-                }
+                if (confirm('Weet je zeker dat je wilt uitloggen?')) logout();
             });
         }
 
@@ -1443,10 +931,8 @@
         // LOGOUT
         // ============================================================
         function logout() {
-            if (pingTimer) { clearTimeout(pingTimer);
-                pingTimer = null; }
-            if (watchPositionId) { navigator.geolocation.clearWatch(watchPositionId);
-                watchPositionId = null; }
+            if (pingTimer) { clearTimeout(pingTimer); pingTimer = null; }
+            if (watchPositionId) { navigator.geolocation.clearWatch(watchPositionId); watchPositionId = null; }
             stopMissionTimer();
             showScreen('loginScreen');
             setStatus(loginStatus, 'Uitgelogd.', 'info');
@@ -1457,7 +943,7 @@
             currentMissionData = null;
             missionUnlocked = false;
             missionOrder = [];
-            missionIndex = 0;
+            lastKnownPosition = null;
         }
 
         // ============================================================
