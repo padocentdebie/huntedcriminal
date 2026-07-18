@@ -331,6 +331,20 @@
             color: #6bff6b;
             margin-bottom: 4px;
         }
+        .note-area {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #2a3a4a;
+        }
+        .note-area .btn {
+            margin-top: 6px;
+        }
+        .godfather-card .chat-messages {
+            max-height: 150px;
+        }
+        #mapContainer {
+            margin-top: 12px;
+        }
     </style>
 </head>
 <body>
@@ -393,13 +407,30 @@
             <div class="card" id="missionCard">
                 <h2>📋 Huidige missie</h2>
                 <div id="missionCryptic" class="mission-box">(Geen actieve missie)</div>
-                <div id="missionFull" class="mission-details hidden">
-                    <strong>Opdracht:</strong> <span id="missionDescription"></span>
-                    <div id="spoorDisplay" class="spoor-box hidden"><strong>🔍 Spoor:</strong> <span id="spoorContent"></span></div>
+
+                <!-- KAART & AFSTAND – altijd zichtbaar bij actieve missie -->
+                <div id="mapContainer" class="hidden">
+                    <div id="criminalMap"></div>
                     <div style="margin-top:8px;font-size:0.85rem;color:#8899aa;" id="missionProgress">
                         Afstand tot locatie: <span id="distanceDisplay">--</span> meter
                     </div>
-                    <div id="criminalMap"></div>
+                </div>
+
+                <!-- DETAILS (zichtbaar na ontgrendeling) -->
+                <div id="missionFull" class="mission-details hidden">
+                    <strong>Opdracht:</strong> <span id="missionDescription"></span>
+                    <div id="spoorDisplay" class="spoor-box hidden"><strong>🔍 Spoor:</strong> <span id="spoorContent"></span></div>
+
+                    <!-- Notitie-invoer (alleen zichtbaar als missie is ontgrendeld) -->
+                    <div class="note-area" id="noteArea">
+                        <label for="missionNoteInput">📝 Antwoord/Notitie voor de opdracht:</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <input type="text" id="missionNoteInput" placeholder="Bijv. signalement, bevindingen..." style="flex:1;" />
+                            <button class="btn btn-warning" id="sendNoteBtn">📨 Verstuur notitie</button>
+                            <span id="noteStatus" style="font-size:0.8rem;color:#8899aa;align-self:center;"></span>
+                        </div>
+                    </div>
+
                     <div class="photo-upload-area" style="margin-top:8px;">
                         <input type="file" id="proofPhotoInput" accept="image/*" capture="environment" />
                         <button class="btn btn-success" id="uploadProofBtn">📷 Upload bewijs</button>
@@ -426,13 +457,23 @@
                 </div>
             </div>
 
-            <!-- CHAT -->
+            <!-- PUBLIEKE CHAT -->
             <div class="card">
-                <h2>💬 Chat (publiek)</h2>
+                <h2>💬 Publieke chat</h2>
                 <div id="criminalChatMessages" class="chat-messages">Geen berichten.</div>
                 <div style="display:flex;gap:8px;">
                     <input type="text" id="criminalChatInput" placeholder="Bericht..." style="flex:1;" />
                     <button class="btn btn-primary" id="criminalSendChatBtn">📤 Verstuur</button>
+                </div>
+            </div>
+
+            <!-- GODFATHER CHAT (vragen aan docent) -->
+            <div class="card godfather-card">
+                <h2>💬 Godfather (vragen aan de docent)</h2>
+                <div id="godfatherChatMessages" class="chat-messages">Geen berichten.</div>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="godfatherChatInput" placeholder="Stel een vraag aan Godfather..." style="flex:1;" />
+                    <button class="btn btn-primary" id="godfatherSendBtn">📤 Stuur vraag</button>
                 </div>
             </div>
 
@@ -486,11 +527,11 @@
         // CONSTANTS
         // ============================================================
         const GAME_DURATION = 3600; // 60 minuten
-        const MISSION_RADIUS = 15; // meter
+        const MISSION_RADIUS = 20; // meter
         const MISSION_TIMEOUT = 360; // 6 minuten per missie
 
         // ============================================================
-        // MISSIE DATA (gebruiker's eigen missies)
+        // MISSIE DATA
         // ============================================================
         const MISSION_DATA = [{
             "id": "mission1",
@@ -582,12 +623,19 @@
         const uploadProofBtn = document.getElementById('uploadProofBtn');
         const proofUploadStatus = document.getElementById('proofUploadStatus');
         const criminalExtractLoc = document.getElementById('criminalExtractLoc');
-        const mapContainer = document.getElementById('criminalMap');
+        const mapContainer = document.getElementById('mapContainer');
         const missionTimerDisplay = document.getElementById('missionTimerDisplay');
         const missionCounter = document.getElementById('missionCounter');
         const currentMissionNum = document.getElementById('currentMissionNum');
         const autoAdvanceNotice = document.getElementById('autoAdvanceNotice');
         const missionCompleteBanner = document.getElementById('missionCompleteBanner');
+
+        const missionNoteInput = document.getElementById('missionNoteInput');
+        const sendNoteBtn = document.getElementById('sendNoteBtn');
+        const noteStatus = document.getElementById('noteStatus');
+        const godfatherChatInput = document.getElementById('godfatherChatInput');
+        const godfatherSendBtn = document.getElementById('godfatherSendBtn');
+        const godfatherChatMessages = document.getElementById('godfatherChatMessages');
 
         // ============================================================
         // STATE
@@ -610,7 +658,7 @@
         let missionStartTime = null;
         let missionTimeoutId = null;
         let isMissionActive = false;
-        let missionOrder = []; // ['mission1', 'mission2', ...] in volgorde
+        let missionOrder = [];
         let missionIndex = 0;
         let allMissionIds = [];
         let pingTimer = null;
@@ -699,7 +747,6 @@
                 }
             }, 500);
 
-            // Harde 6-minuut timeout
             missionTimeoutId = setTimeout(() => {
                 if (!missionCompleted && isMissionActive) {
                     console.log('⏰ 6 minuten verstreken, automatisch door naar volgende missie');
@@ -759,7 +806,6 @@
         }
 
         function buildMissionOrder() {
-            // mission1 altijd eerst, dan de rest (2-8) in willekeurige volgorde
             const first = MISSION_DATA.filter(m => m.id === 'mission1');
             const rest = MISSION_DATA.filter(m => m.id !== 'mission1');
             const shuffled = shuffleArray([...rest]);
@@ -774,10 +820,8 @@
             const player = playerSnap.val();
             if (!player) return;
 
-            // Bepaal welke missies al voltooid zijn
             const completed = player.completedMissions || [];
 
-            // Vind de eerstvolgende missie in de volgorde die nog niet voltooid is
             let nextId = null;
             for (const id of missionOrder) {
                 if (!completed.includes(id)) {
@@ -787,7 +831,6 @@
             }
 
             if (!nextId) {
-                // Alle missies voltooid!
                 isGameComplete = true;
                 missionCryptic.textContent = '🏆 Gefeliciteerd! Je hebt alle missies voltooid en bent ontsnapt!';
                 missionFull.classList.add('hidden');
@@ -803,10 +846,11 @@
                 if (watchPositionId) { navigator.geolocation.clearWatch(watchPositionId);
                     watchPositionId = null; }
                 await update(playerRef, { extractReached: true, status: 'escaped' });
+                // Verberg mapcontainer
+                mapContainer.classList.add('hidden');
                 return;
             }
 
-            // Volgende missie toewijzen
             await update(playerRef, { currentMissionId: nextId });
         }
 
@@ -835,9 +879,13 @@
                 spoorDisplay.classList.add('hidden');
             }
 
-            // Verberg volledige opdracht tot op locatie
+            // Verberg volledige opdracht (wordt zichtbaar bij ontgrendeling)
             missionFull.classList.add('hidden');
             missionCompleteBanner.classList.add('hidden');
+            document.getElementById('noteArea').style.display = 'none';
+
+            // Toon kaartcontainer
+            mapContainer.classList.remove('hidden');
 
             // Update locatie in header
             const idx = missionOrder.indexOf(missionId) + 1;
@@ -845,7 +893,7 @@
             currentMissionNum.textContent = idx;
             criminalExtractLoc.textContent = `📍 ${mission.description.substring(0, 50)}...`;
 
-            // Update kaart
+            // Update kaart (altijd zichtbaar)
             updateMap(mission.lat, mission.lng);
 
             // Start tracking
@@ -870,7 +918,6 @@
             uploadProofBtn.disabled = false;
             autoAdvanceNotice.style.display = 'block';
 
-            // Update in Firebase dat de speler deze missie heeft
             await update(playerRef, { currentMissionId: missionId });
         }
 
@@ -886,7 +933,6 @@
                 return;
             }
 
-            // Eerste check
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const dist = getDistanceFromLatLonInMeters(pos.coords.latitude, pos.coords.longitude, mission.lat, mission
@@ -899,7 +945,6 @@
                 { enableHighAccuracy: true, timeout: 5000 }
             );
 
-            // Continue tracking
             watchPositionId = navigator.geolocation.watchPosition(
                 (pos) => {
                     const dist = getDistanceFromLatLonInMeters(pos.coords.latitude, pos.coords.longitude, mission.lat, mission
@@ -918,15 +963,14 @@
             if (distance <= MISSION_RADIUS && !missionUnlocked) {
                 missionUnlocked = true;
                 missionFull.classList.remove('hidden');
-                // Toon de volledige opdracht nu
                 missionDescription.textContent = currentMissionData.description;
                 if (currentMissionData.spoor) {
                     spoorDisplay.classList.remove('hidden');
                     spoorContent.textContent = currentMissionData.spoor;
                 }
+                document.getElementById('noteArea').style.display = 'block';
                 setStatus(document.getElementById('missionProgress'), '📍 Je bent bij de locatie! Voer de opdracht uit en upload het bewijs.',
                     'success');
-                // Stuur chat dat ze bij de locatie zijn
                 const chatsRef = ref(db, `klassen/${className}/chats`);
                 push(chatsRef, {
                     sender: '📍 Locatie',
@@ -981,7 +1025,6 @@
                 `;
                 stopMissionTimer();
 
-                // Markeer als voltooid in Firebase
                 const playerSnap = await get(playerRef);
                 const player = playerSnap.val();
                 const completed = player.completedMissions || [];
@@ -993,7 +1036,6 @@
                     });
                 }
 
-                // Stuur chat dat missie voltooid is
                 const chatsRef = ref(db, `klassen/${className}/chats`);
                 await push(chatsRef, {
                     sender: '✅ Missie',
@@ -1002,7 +1044,6 @@
                     isSystem: true
                 });
 
-                // Na korte pauze, volgende missie
                 setTimeout(() => {
                     missionCompleteBanner.classList.add('hidden');
                     assignNextMission();
@@ -1025,7 +1066,6 @@
             isMissionActive = false;
             stopMissionTimer();
 
-            // Markeer als voltooid (ook al is er geen foto)
             const playerSnap = await get(playerRef);
             const player = playerSnap.val();
             const completed = player.completedMissions || [];
@@ -1037,7 +1077,6 @@
                 });
             }
 
-            // Stuur chat dat de tijd om is
             const chatsRef = ref(db, `klassen/${className}/chats`);
             await push(chatsRef, {
                 sender: '⏰ Tijd',
@@ -1096,6 +1135,7 @@
         // ============================================================
         function initChat() {
             const chatsRef = ref(db, `klassen/${className}/chats`);
+            // Publieke chat
             onValue(chatsRef, (snapshot) => {
                 const data = snapshot.val();
                 const chatDiv = document.getElementById('criminalChatMessages');
@@ -1121,6 +1161,35 @@
                 chatDiv.scrollTop = chatDiv.scrollHeight;
             });
 
+            // Godfather chat (filter)
+            onValue(chatsRef, (snapshot) => {
+                const data = snapshot.val();
+                const chatDiv = document.getElementById('godfatherChatMessages');
+                if (!data) {
+                    chatDiv.innerHTML = '<div style="color:#8899aa;">Geen berichten.</div>';
+                    return;
+                }
+                let html = '';
+                const keys = Object.keys(data).sort((a, b) => data[a].timestamp - data[b].timestamp);
+                for (const key of keys) {
+                    const msg = data[key];
+                    const sender = msg.sender || '';
+                    if (sender.includes('Godfather') || sender.includes('Vraag aan Godfather')) {
+                        const isSystem = msg.isSystem || false;
+                        const senderClass = isSystem ? 'color:#f0c040;' : '';
+                        html += `
+                            <div class="chat-message">
+                                <span class="sender" style="${senderClass}">${sender}:</span>
+                                <span>${msg.text}</span>
+                                <span class="time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+                            </div>
+                        `;
+                    }
+                }
+                chatDiv.innerHTML = html || '<div style="color:#8899aa;">Geen berichten.</div>';
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            });
+
             document.getElementById('criminalSendChatBtn').addEventListener('click', async () => {
                 const text = document.getElementById('criminalChatInput').value.trim();
                 if (!text) return;
@@ -1133,10 +1202,48 @@
                 document.getElementById('criminalChatInput').value = '';
             });
 
-            // Enter key
             document.getElementById('criminalChatInput').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     document.getElementById('criminalSendChatBtn').click();
+                }
+            });
+
+            sendNoteBtn.addEventListener('click', async () => {
+                const text = missionNoteInput.value.trim();
+                if (!text) {
+                    setStatus(noteStatus, 'Voer een notitie in.', 'warning');
+                    return;
+                }
+                if (!missionUnlocked) {
+                    setStatus(noteStatus, 'Je bent nog niet bij de locatie.', 'warning');
+                    return;
+                }
+                await push(chatsRef, {
+                    sender: `📝 Notitie (${teamName})`,
+                    text: text,
+                    timestamp: getTimestamp(),
+                    isSystem: false
+                });
+                setStatus(noteStatus, '✅ Notitie verzonden!', 'success');
+                missionNoteInput.value = '';
+                setTimeout(() => { setStatus(noteStatus, '', 'info'); }, 3000);
+            });
+
+            godfatherSendBtn.addEventListener('click', async () => {
+                const text = godfatherChatInput.value.trim();
+                if (!text) return;
+                await push(chatsRef, {
+                    sender: `❓ Vraag aan Godfather (${teamName})`,
+                    text: text,
+                    timestamp: getTimestamp(),
+                    isSystem: false
+                });
+                godfatherChatInput.value = '';
+            });
+
+            godfatherChatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    godfatherSendBtn.click();
                 }
             });
         }
@@ -1241,7 +1348,6 @@
         // CRIMINEEL DASHBOARD
         // ============================================================
         function initCriminalDashboard(teamName, className) {
-            // Timer update
             updateGlobalTimer();
             setInterval(() => updateGlobalTimer(), 1000);
 
@@ -1250,22 +1356,18 @@
             gameStatusRef = ref(db, `klassen/${className}/game/status`);
             missionsRef = ref(db, `klassen/${className}/missions`);
 
-            // Zet missievolgorde klaar
             missionOrder = buildMissionOrder();
             console.log('📋 Missie volgorde:', missionOrder);
             document.getElementById('missionCounter').innerHTML =
                 `Missie <strong id="currentMissionNum">0</strong> van <strong>${missionOrder.length}</strong>`;
 
-            // Initialiseer kaart
             initMap();
 
-            // Wacht op game status
             onValue(gameStatusRef, async (snapshot) => {
                 const status = snapshot.val();
                 if (status === 'running') {
                     gameStarted = true;
                     waitingMessage.classList.add('hidden');
-                    // Check of speler al een missie heeft
                     const playerSnap = await get(playerRef);
                     const player = playerSnap.val();
                     if (player && player.currentMissionId) {
@@ -1282,7 +1384,6 @@
                 }
             });
 
-            // Luister naar missie veranderingen
             onValue(playerRef, async (snapshot) => {
                 const player = snapshot.val();
                 if (!player) return;
@@ -1296,13 +1397,9 @@
                 }
             });
 
-            // Init foto feed
             initPhotoFeed();
-
-            // Init chat
             initChat();
 
-            // Upload bewijs
             uploadProofBtn.addEventListener('click', () => {
                 if (!missionUnlocked) {
                     setStatus(proofUploadStatus, '⚠️ Je moet eerst bij de locatie zijn!', 'warning');
@@ -1323,7 +1420,6 @@
                 proofPhotoInput.value = '';
             });
 
-            // Algemene foto
             uploadPhotoBtn.addEventListener('click', () => {
                 photoInput.click();
             });
@@ -1336,7 +1432,6 @@
                 photoInput.value = '';
             });
 
-            // Uitloggen
             document.getElementById('criminalLogoutBtn').addEventListener('click', () => {
                 if (confirm('Weet je zeker dat je wilt uitloggen?')) {
                     logout();
@@ -1355,7 +1450,6 @@
             stopMissionTimer();
             showScreen('loginScreen');
             setStatus(loginStatus, 'Uitgelogd.', 'info');
-            // Reset state
             isGameComplete = false;
             missionCompleted = false;
             isMissionActive = false;
